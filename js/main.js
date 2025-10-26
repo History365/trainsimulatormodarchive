@@ -253,7 +253,7 @@ function buildGalleryArray() {
     return images;
 }
 
-// Update main gallery image with professional crossfade
+// Update main gallery image with professional crossfade and progressive blur loading
 function updateMainGalleryImage(index) {
     const mainImg = document.getElementById('mainDisplayImage');
     if (!mainImg || !galleryImages[index]) return;
@@ -265,23 +265,28 @@ function updateMainGalleryImage(index) {
     // Fade out current image
     mainImg.style.opacity = '0';
     
-    // Wait for fade out, swap image, then fade in
+    // Wait for fade out, swap image, then fade in with blur effect
     setTimeout(() => {
-        // Preload the new image to ensure smooth transition
+        // Apply blur immediately
+        mainImg.classList.add('loading');
+        mainImg.src = galleryImages[index];
+        
+        // Fade in blurred image
+        requestAnimationFrame(() => {
+            mainImg.style.opacity = '1';
+        });
+        
+        // Preload high quality version
         const preloadImg = new Image();
         preloadImg.onload = () => {
-            mainImg.src = galleryImages[index];
-            
-            // Use double RAF for smooth paint
+            // Remove blur once fully loaded
             requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    mainImg.style.opacity = '1';
-                    mainImg.dataset.transitioning = 'false';
-                });
+                mainImg.classList.remove('loading');
+                mainImg.dataset.transitioning = 'false';
             });
         };
         preloadImg.src = galleryImages[index];
-    }, 450); // Match CSS transition
+    }, 500); // Match CSS transition
     
     // Update UI elements
     updateActiveThumbnail(index);
@@ -360,14 +365,42 @@ function startMainGalleryAutoCycle() {
         // First time initialization - this is fine
     }
     
-    mainGalleryInterval = setInterval(() => {
-        if (autoPlayStopped) {
-            stopMainGalleryAutoCycle();
-            return;
-        }
-        currentCycleIndex = (currentCycleIndex + 1) % galleryImages.length;
-        updateMainGalleryImage(currentCycleIndex);
-    }, 5000); // Change every 5 seconds
+    // Preload all images before starting auto-cycle
+    let loadedCount = 0;
+    const totalImages = galleryImages.length;
+    
+    galleryImages.forEach((imgSrc) => {
+        const img = new Image();
+        img.onload = () => {
+            loadedCount++;
+            if (loadedCount === totalImages && !mainGalleryInterval) {
+                // All images loaded, start the auto-cycle
+                mainGalleryInterval = setInterval(() => {
+                    if (autoPlayStopped) {
+                        stopMainGalleryAutoCycle();
+                        return;
+                    }
+                    currentCycleIndex = (currentCycleIndex + 1) % galleryImages.length;
+                    updateMainGalleryImage(currentCycleIndex);
+                }, 5000); // Change every 5 seconds
+            }
+        };
+        img.onerror = () => {
+            loadedCount++;
+            if (loadedCount === totalImages && !mainGalleryInterval) {
+                // Start even if some images failed
+                mainGalleryInterval = setInterval(() => {
+                    if (autoPlayStopped) {
+                        stopMainGalleryAutoCycle();
+                        return;
+                    }
+                    currentCycleIndex = (currentCycleIndex + 1) % galleryImages.length;
+                    updateMainGalleryImage(currentCycleIndex);
+                }, 5000);
+            }
+        };
+        img.src = imgSrc;
+    });
 }
 
 // Stop main gallery auto-cycle
