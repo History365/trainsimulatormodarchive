@@ -1391,10 +1391,9 @@ body {
 /* Mod Main Section */
 .mod-exconrail-main {
     max-width: 1800px;
-    margin: 2rem auto 1.5rem auto;
+    margin: 1.5rem auto;
     padding: 0 2rem;
     display: block;
-    grid-template-columns: unset;
 }
 
 /* Contributor Page Styles */
@@ -1550,28 +1549,32 @@ body {
 .mod-exconrail-section {
     background-color: #1a1a1a;
     border-radius: 12px;
-    padding: 2.5rem;
+    padding: 1.5rem 2.5rem 1.5rem 2.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     margin: 0 auto;
     max-width: 100%;
+    width: 100%;
     border: 1px solid #2a2a2a;
 }
 
 /* Breadcrumb */
 .mod-exconrail-section .text-gray-400 {
-    color: #888;
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
+    color: #b8b8b8;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
 }
 
 .mod-exconrail-section .text-gray-400 a {
-    color: #999;
+    color: #b8b8b8;
     text-decoration: none;
     transition: color 0.2s ease;
+    font-family: 'Inter', sans-serif;
 }
 
 .mod-exconrail-section .text-gray-400 a:hover {
-    color: #ccc;
+    color: #ffffff;
     text-decoration: none;
 }
 
@@ -1580,9 +1583,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
     border-bottom: 1px solid #2a2a2a;
+}
+
+.mod-exconrail-content-grid {
+    margin-top: 1rem;
 }
 
 .mod-exconrail-section h1 {
@@ -1591,10 +1598,14 @@ body {
     margin-bottom: 0.5rem;
     color: #ffffff;
     letter-spacing: -0.02em;
+    font-family: 'Inter', sans-serif;
 }
 
 .mod-exconrail-section .text-gray-400 {
-    color: #888;
+    color: #b8b8b8;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
 }
 
 /* Download Button */
@@ -1626,14 +1637,24 @@ body {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 0.5rem;
+    gap: 0;
+    position: relative;
 }
 
 .download-notice {
     color: #888;
     font-size: 0.75rem;
-    margin: 0;
+    margin-top: 0.35rem;
+    font-weight: 400;
     font-style: italic;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    margin-top: 0.35rem;
 }
 
 .mobile-only {
@@ -1649,12 +1670,14 @@ body {
 
 /* Description Section */
 .mod-exconrail-content-grid h2 {
-    font-size: 1.125rem;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 600;
     color: #ffffff;
     margin-bottom: 0.75rem;
     margin-top: 1.75rem;
     font-family: 'Inter', sans-serif;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #2a2a2a;
 }
 
 .mod-exconrail-content-grid h2:first-of-type {
@@ -1668,6 +1691,8 @@ body {
     margin-bottom: 0.75rem;
     margin-top: 1.5rem;
     font-family: 'Inter', sans-serif;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #2a2a2a;
 }
 
 .mod-exconrail-content-grid p {
@@ -1677,6 +1702,7 @@ body {
     line-height: 1.7;
     margin-bottom: 1rem;
     font-family: 'Inter', sans-serif;
+    letter-spacing: 0;
 }
 
 .mod-exconrail-content-grid ul {
@@ -1688,6 +1714,10 @@ body {
     padding-left: 1.5rem;
     list-style-type: disc;
     font-family: 'Inter', sans-serif;
+}
+
+.mod-exconrail-content-grid ul:last-child {
+    margin-bottom: 0;
 }
 
 .mod-exconrail-content-grid ul li {
@@ -1702,49 +1732,89 @@ body {
 /* Features List - Use dashes */
 .mod-exconrail-content-grid ul.features-list {
     list-style-type: none;
-    padding-left: 0;
+    padding-left: 1.25rem;
+    margin-left: 0;
 }
 
 .mod-exconrail-content-grid ul.features-list li {
     list-style-type: none;
-    padding-left: 1.25rem;
+    padding-left: 0;
     position: relative;
+    margin-bottom: 0.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #b8b8b8;
+    line-height: 1.7;
 }
 
 .mod-exconrail-content-grid ul.features-list li::before {
     content: "–";
     position: absolute;
-    left: 0;
+    left: -1.25rem;
     color: #b8b8b8;
+    width: 1rem;
 }
 
-/* Requirements List - Dots with bold and underlined text */
+/* Requirements List - Use dashes like features */
 .mod-exconrail-content-grid ul.requirements-list {
-    list-style-type: disc;
-    padding-left: 1.5rem;
-    color: #ffffff;
+    list-style-type: none;
+    padding-left: 1.25rem;
+    color: #b8b8b8;
+    margin-left: 0;
 }
 
 .mod-exconrail-content-grid ul.requirements-list li {
-    margin-bottom: 0.75rem;
-    list-style-type: disc;
+    list-style-type: none;
+    padding-left: 0;
+    position: relative;
+    margin-bottom: 0.5rem;
     font-size: 0.875rem;
     font-weight: 400;
-    color: #ffffff;
+    color: #b8b8b8;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+}
+
+.mod-exconrail-content-grid ul.requirements-list li::before {
+    content: "–";
+    position: absolute;
+    left: -1.25rem;
+    color: #b8b8b8;
+    width: 1rem;
 }
 
 .mod-exconrail-content-grid ul.requirements-list a {
-    color: #ffffff;
-    text-decoration: underline;
-    font-weight: 700;
+    color: #b8b8b8;
+    font-weight: 400;
     transition: color 0.2s ease;
     font-family: 'Inter', sans-serif;
     font-size: 0.875rem;
+    text-decoration: none;
+    text-underline-offset: 2px;
+    display: inline;
+}
+
+.mod-exconrail-content-grid ul.requirements-list a::after {
+    content: " \f35d";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 0.7rem;
+    margin-left: 0.25rem;
+    text-decoration: none;
+    display: inline-block;
+    vertical-align: baseline;
 }
 
 .mod-exconrail-content-grid ul.requirements-list a:hover {
-    color: #ccc;
+    color: #ffffff;
     text-decoration: underline;
+    text-decoration-skip-ink: none;
+}
+
+.mod-exconrail-content-grid ul.requirements-list a:hover::after {
+    text-decoration: none;
+    display: inline-block;
 }
 
 /* Mobile download button - hidden by default */
