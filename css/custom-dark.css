@@ -182,6 +182,11 @@ a:hover {
     min-height: 80px;
 }
 
+.navbar .container-fluid {
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
 .navbar-brand {
     color: var(--text-color);
     font-size: 1rem;
@@ -1616,6 +1621,25 @@ body {
     border-color: #4a4a4a;
 }
 
+/* Download Section */
+.download-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.download-notice {
+    color: #888;
+    font-size: 0.75rem;
+    margin: 0;
+    font-style: italic;
+}
+
+.mobile-only {
+    display: none;
+}
+
 /* Content Grid */
 .mod-exconrail-content-grid {
     display: grid;
@@ -1675,15 +1699,35 @@ body {
     color: #b8b8b8;
 }
 
-.mod-exconrail-content-grid ul.requirements-list {
+/* Features List - Use dashes */
+.mod-exconrail-content-grid ul.features-list {
     list-style-type: none;
     padding-left: 0;
+}
+
+.mod-exconrail-content-grid ul.features-list li {
+    list-style-type: none;
+    padding-left: 1.25rem;
+    position: relative;
+}
+
+.mod-exconrail-content-grid ul.features-list li::before {
+    content: "–";
+    position: absolute;
+    left: 0;
+    color: #b8b8b8;
+}
+
+/* Requirements List - Dots with bold and underlined text */
+.mod-exconrail-content-grid ul.requirements-list {
+    list-style-type: disc;
+    padding-left: 1.5rem;
     color: #ffffff;
 }
 
 .mod-exconrail-content-grid ul.requirements-list li {
     margin-bottom: 0.75rem;
-    list-style-type: none;
+    list-style-type: disc;
     font-size: 0.875rem;
     font-weight: 400;
     color: #ffffff;
@@ -1691,16 +1735,22 @@ body {
 
 .mod-exconrail-content-grid ul.requirements-list a {
     color: #ffffff;
-    text-decoration: none;
+    text-decoration: underline;
+    font-weight: 700;
     transition: color 0.2s ease;
     font-family: 'Inter', sans-serif;
     font-size: 0.875rem;
-    font-weight: 400;
 }
 
 .mod-exconrail-content-grid ul.requirements-list a:hover {
     color: #ccc;
     text-decoration: underline;
+}
+
+/* Mobile download button - hidden by default */
+.mobile-download-btn {
+    display: none;
+    margin-top: 2rem;
 }
 
 .mod-exconrail-content-grid a {
@@ -1830,8 +1880,14 @@ body {
     object-fit: cover;
     display: block;
     opacity: 1;
-    transition: opacity 0.45s cubic-bezier(0.4, 0.0, 0.2, 1);
-    will-change: opacity;
+    transition: opacity 0.5s cubic-bezier(0.4, 0.0, 0.2, 1), filter 0.3s ease-out;
+    will-change: opacity, filter;
+    filter: blur(0px);
+}
+
+.mod-gallery-main img.loading {
+    filter: blur(20px);
+    transform: scale(1.05);
 }
 
 .mod-gallery-main img.loaded {
@@ -2631,8 +2687,24 @@ body {
         text-align: center;
     }
     
+    /* Hide top download button on mobile, show bottom one */
+    .flex.justify-between .mod-exconrail-download-button {
+        display: none;
+    }
+    
+    .mobile-download-btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .mobile-only {
+        display: block;
+        text-align: center;
+    }
+    
     .mod-gallery-main img {
-        height: 300px;
+        height: 150px;
     }
     
     .mod-gallery-thumbs {
@@ -2758,7 +2830,7 @@ body {
     
     /* Gallery Mobile Styles */
     .mod-gallery-main img {
-        height: 250px;
+        height: 150px;
     }
     
     .mod-gallery-thumbs {
