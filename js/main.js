@@ -688,25 +688,109 @@ if (mobileMenuBtn && mobileNav) {
     });
 }
 
-// Download Modal System
+// Download System
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('download-trigger') || e.target.closest('.download-trigger')) {
         e.preventDefault();
         const btn = e.target.classList.contains('download-trigger') ? e.target : e.target.closest('.download-trigger');
+        const fileUrl = btn.dataset.url;
         
-        const fileInfo = {
-            name: btn.dataset.name || 'Unknown',
-            version: btn.dataset.version || '1.0',
-            size: btn.dataset.size || 'Unknown',
-            date: btn.dataset.date || 'Unknown',
-            author: btn.dataset.author || 'Unknown'
-        };
+        // Check if it's a direct download link (ends with file extension) or external site
+        const isDirectDownload = /\.(zip|rar|7z|exe|pdf|png|jpg|jpeg|gif|bmp|webp)$/i.test(fileUrl);
         
-        openDownloadModal(btn.dataset.url, fileInfo);
+        if (isDirectDownload) {
+            // Use the existing modal for all downloads
+            const fileInfo = {
+                name: btn.dataset.name || fileUrl.split('/').pop(),
+                version: btn.dataset.version || '1.0',
+                size: btn.dataset.size || 'Unknown',
+                date: btn.dataset.date || 'Unknown',
+                author: btn.dataset.author || 'Unknown'
+            };
+            
+            // Open modal and start download
+            openDownloadModal(fileUrl, fileInfo, true); // Pass true for direct download
+        } else {
+            // External site (Google Drive, etc.)
+            const fileInfo = {
+                name: btn.dataset.name || 'Unknown',
+                version: btn.dataset.version || '1.0',
+                size: btn.dataset.size || 'Unknown',
+                date: btn.dataset.date || 'Unknown',
+                author: btn.dataset.author || 'Unknown'
+            };
+            
+            openDownloadModal(fileUrl, fileInfo, false);
+        }
     }
 });
 
-function openDownloadModal(fileUrl, fileInfo) {
+function showDownloadNotification(message) {
+    // Remove existing notification if present
+    const existing = document.getElementById('downloadNotification');
+    if (existing) {
+        existing.remove();
+    }
+    
+    // Create notification
+    const notification = document.createElement('div');
+    notification.id = 'downloadNotification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: #1a1a1a;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #2a2a2a;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        font-family: Inter, sans-serif;
+        font-size: 0.9rem;
+        animation: slideIn 0.3s ease-out;
+    `;
+    notification.textContent = message;
+    
+    // Add animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    `;
+    if (!document.getElementById('notificationStyles')) {
+        style.id = 'notificationStyles';
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+function openDownloadModal(fileUrl, fileInfo, isDirectDownload = false) {
     // Create modal if it doesn't exist
     let modal = document.getElementById('downloadModalOverlay');
     if (!modal) {
@@ -715,20 +799,46 @@ function openDownloadModal(fileUrl, fileInfo) {
     }
     
     // Set manual download button URL
-    document.getElementById('modalManualDownloadBtn').href = fileUrl;
+    const manualBtn = document.getElementById('modalManualDownloadBtn');
+    manualBtn.href = fileUrl;
     
-    // Show modal
+    // For direct downloads, remove target="_blank" so it stays in same tab
+    if (isDirectDownload) {
+        manualBtn.removeAttribute('target');
+        manualBtn.setAttribute('download', fileInfo.name);
+    } else {
+        manualBtn.setAttribute('target', '_blank');
+        manualBtn.removeAttribute('download');
+    }
+    
+    // Show modal with initial text
     modal.style.display = 'flex';
     setTimeout(() => {
         modal.classList.add('active');
     }, 10);
     
-    // Auto-start download after 1.5 seconds
-    setTimeout(() => {
-        window.open(fileUrl, '_blank');
+    // Start download immediately and update popup
+    if (isDirectDownload) {
+        // Update text immediately
         document.getElementById('downloadStatusTitle').textContent = 'Download Started!';
-        document.getElementById('downloadStatusText').textContent = 'Check your downloads folder. If the download didn\'t start, use the button below.';
-    }, 1500);
+        document.getElementById('downloadStatusText').textContent = 'Your download has started. Check your downloads folder. If the download didn\'t start, click the button below.';
+        
+        // Direct download - simple approach without fetch
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = fileInfo.name;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } else {
+        // External link - open in new tab after delay
+        setTimeout(() => {
+            window.open(fileUrl, '_blank');
+            document.getElementById('downloadStatusTitle').textContent = 'Download Started!';
+            document.getElementById('downloadStatusText').textContent = 'Check your downloads folder. If the download didn\'t start, use the button below.';
+        }, 1500);
+    }
 }
 
 function closeDownloadModal() {
