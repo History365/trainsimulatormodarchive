@@ -21,23 +21,19 @@ async function loadFileInfo(filename) {
 }
 
 // Update file details on page
-async function updateFileDetails(filename, targetSelector = '.download-trigger') {
+async function updateFileDetails(filename, targetSelector = '.file-details-box') {
   const fileInfo = await loadFileInfo(filename);
   
   if (!fileInfo) return;
   
-  // Update all elements with file details
-  const elements = document.querySelectorAll(targetSelector);
+  // Update all elements with file details - look for the container or within it
+  const containers = document.querySelectorAll(targetSelector);
   
-  elements.forEach(element => {
-    // Update data attributes
-    element.dataset.size = fileInfo.sizeFormatted;
-    element.dataset.date = fileInfo.uploaded;
-    
+  containers.forEach(container => {
     // Find and update the display elements inside the file box
-    const sizeSpan = element.querySelector('[data-file-size]');
-    const uploadedSpan = element.querySelector('[data-file-uploaded]');
-    const downloadsSpan = element.querySelector('[data-file-downloads]');
+    const sizeSpan = container.querySelector('[data-file-size]');
+    const uploadedSpan = container.querySelector('[data-file-uploaded]');
+    const downloadsSpan = container.querySelector('[data-file-downloads]');
     
     if (sizeSpan) sizeSpan.textContent = fileInfo.sizeFormatted;
     if (uploadedSpan) uploadedSpan.textContent = `Uploaded ${fileInfo.uploadedAgo}`;
@@ -58,14 +54,14 @@ async function trackDownload(filename) {
 
 // Initialize file info loading on page load
 document.addEventListener('DOMContentLoaded', function() {
-  // Find all download triggers with data-name attribute
-  const downloadTriggers = document.querySelectorAll('.download-trigger[data-name]');
+  // Find all file-details-box containers with data-name attribute
+  const fileBoxes = document.querySelectorAll('.file-details-box[data-name]');
   
-  downloadTriggers.forEach(trigger => {
-    const filename = trigger.dataset.name;
+  fileBoxes.forEach(box => {
+    const filename = box.dataset.name;
     if (filename) {
       // Load file info for this file
-      updateFileDetails(filename, `[data-name="${filename}"]`);
+      updateFileDetails(filename, `.file-details-box[data-name="${filename}"]`);
     }
   });
 });
