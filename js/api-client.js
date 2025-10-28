@@ -1,0 +1,84 @@
+// TSMA API Client - Add to main.js or create separate file
+
+const TSMA_API_URL = 'https://api.trainsimarchive.org'; // Replace with your Worker URL
+
+// Fetch file info and update the page
+async function loadFileInfo(filename) {
+  try {
+    const response = await fetch(`${TSMA_API_URL}/api/file-info/${encodeURIComponent(filename)}`);
+    
+    if (!response.ok) {
+      console.error('Failed to fetch file info');
+      return null;
+    }
+    
+    const fileInfo = await response.json();
+    return fileInfo;
+  } catch (error) {
+    console.error('Error loading file info:', error);
+    return null;
+  }
+}
+
+// Update file details on page
+async function updateFileDetails(filename, targetSelector = '.download-trigger') {
+  const fileInfo = await loadFileInfo(filename);
+  
+  if (!fileInfo) return;
+  
+  // Update all elements with file details
+  const elements = document.querySelectorAll(targetSelector);
+  
+  elements.forEach(element => {
+    // Update data attributes
+    element.dataset.size = fileInfo.sizeFormatted;
+    element.dataset.date = fileInfo.uploaded;
+    
+    // Find and update the display elements inside the file box
+    const sizeSpan = element.querySelector('[data-file-size]');
+    const uploadedSpan = element.querySelector('[data-file-uploaded]');
+    const downloadsSpan = element.querySelector('[data-file-downloads]');
+    
+    if (sizeSpan) sizeSpan.textContent = fileInfo.sizeFormatted;
+    if (uploadedSpan) uploadedSpan.textContent = `Uploaded ${fileInfo.uploadedAgo}`;
+    if (downloadsSpan) downloadsSpan.textContent = `${fileInfo.downloads} download${fileInfo.downloads !== 1 ? 's' : ''}`;
+  });
+}
+
+// Track download when clicked
+async function trackDownload(filename) {
+  try {
+    await fetch(`${TSMA_API_URL}/api/download/${encodeURIComponent(filename)}`, {
+      method: 'POST',
+    });
+  } catch (error) {
+    console.error('Error tracking download:', error);
+  }
+}
+
+// Initialize file info loading on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Find all download triggers with data-name attribute
+  const downloadTriggers = document.querySelectorAll('.download-trigger[data-name]');
+  
+  downloadTriggers.forEach(trigger => {
+    const filename = trigger.dataset.name;
+    if (filename) {
+      // Load file info for this file
+      updateFileDetails(filename, `[data-name="${filename}"]`);
+    }
+  });
+});
+
+// Enhance existing download click handler to track downloads
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('download-trigger') || e.target.closest('.download-trigger')) {
+    const btn = e.target.classList.contains('download-trigger') ? e.target : e.target.closest('.download-trigger');
+    const filename = btn.dataset.name;
+    
+    if (filename) {
+      // Track the download
+      trackDownload(filename);
+    }
+  }
+}, true); // Use capture phase to run before other handlers

@@ -218,6 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Gallery System - Auto-detect images from HTML
     if (document.querySelector('.mod-gallery')) {
+        createLightboxHTML();
         initGallerySystem();
     }
 });
@@ -225,6 +226,39 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 // GALLERY SYSTEM
 // ============================================
+
+// Create lightbox HTML dynamically
+function createLightboxHTML() {
+    const lightboxHTML = `
+        <div id="galleryLightbox" class="gallery-lightbox">
+            <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <button class="lightbox-arrow lightbox-arrow-left" onclick="navigateLightbox(-1)" aria-label="Previous">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <div class="lightbox-image-container">
+                <div class="lightbox-loader" id="lightboxLoader">
+                    <div class="loader-spinner"></div>
+                </div>
+                <img id="lightboxImage" src="" alt="Gallery Image">
+            </div>
+            
+            <button class="lightbox-arrow lightbox-arrow-right" onclick="navigateLightbox(1)" aria-label="Next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <div class="lightbox-info">
+                <span class="lightbox-counter" id="lightboxCounter">1 / 1</span>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', lightboxHTML);
+}
+
 let galleryImages = [];
 let currentIndex = 0;
 let isLoading = false;
@@ -238,13 +272,7 @@ let autoPlayStopped = false;
 function buildGalleryArray() {
     const images = [];
     
-    // Get main image
-    const mainImg = document.getElementById('mainDisplayImage');
-    if (mainImg) {
-        images.push(mainImg.src);
-    }
-    
-    // Get all thumbnail images
+    // Get ONLY thumbnail images (not the main image)
     const thumbs = document.querySelectorAll('.gallery-thumb img');
     thumbs.forEach(thumb => {
         images.push(thumb.src);
@@ -616,6 +644,12 @@ function initGallerySystem() {
     // Build gallery array and setup fade-in
     galleryImages = buildGalleryArray();
     
+    // Set main display image to first thumbnail image
+    const mainImg = document.getElementById('mainDisplayImage');
+    if (mainImg && galleryImages.length > 0) {
+        mainImg.src = galleryImages[0];
+    }
+    
     setupImageFadeIn();
     
     // Generate gallery dots
@@ -895,4 +929,18 @@ function createDownloadModal() {
     });
     
     return overlay;
+}
+
+// Collapsible section toggle function
+function toggleSection(sectionId) {
+    const content = document.getElementById(sectionId + '-content');
+    const icon = document.getElementById(sectionId + '-icon');
+    
+    if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        icon.style.transform = 'rotate(0deg)';
+    } else {
+        content.style.display = 'none';
+        icon.style.transform = 'rotate(-90deg)';
+    }
 }

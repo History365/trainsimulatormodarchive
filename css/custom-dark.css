@@ -1,7 +1,7 @@
 /* 
  * Train Simulator Mod Archive - Custom Dark Theme
  * Modern dark mode styling for the archive
- * Last updated: October 24, 2025
+ * Last updated: October 27, 2025
  */
 
 :root {
@@ -39,6 +39,7 @@
 /* Base Styles */
 html {
     overflow-y: scroll;
+    scroll-padding-top: 100px;
 }
 
 body {
@@ -379,6 +380,15 @@ footer {
     flex: 1;
     padding: 1.5rem;
     max-width: 900px;
+    margin: 0 auto;
+    display: block;
+}
+
+/* Wider variant for contributor listing pages */
+.privacy-main-wide {
+    flex: 1;
+    padding: 1.5rem;
+    max-width: 1000px;
     margin: 0 auto;
     display: block;
 }
@@ -1401,6 +1411,7 @@ body {
     max-width: 1400px;
     margin: 2rem auto 1.5rem auto;
     padding: 0 2rem;
+    width: 100%;
 }
 
 .contributor-page-section {
@@ -1409,6 +1420,8 @@ body {
     padding: 3rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     border: 1px solid #2a2a2a;
+    width: 100%;
+    margin: 0 auto;
 }
 
 .contributor-header {
@@ -2303,7 +2316,7 @@ body {
 }
 
 .gallery-lightbox.active {
-    background-color: rgba(0, 0, 0, 0.92);
+    background-color: rgba(0, 0, 0, 0.75);
 }
 
 .lightbox-image-container {
