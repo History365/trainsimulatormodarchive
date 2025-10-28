@@ -36,8 +36,31 @@ async function updateFileDetails(filename, targetSelector = '.file-details-box')
     const downloadsSpan = container.querySelector('[data-file-downloads]');
     
     if (sizeSpan) sizeSpan.textContent = fileInfo.sizeFormatted;
-    if (uploadedSpan) uploadedSpan.textContent = `Uploaded ${fileInfo.uploadedAgo}`;
-    if (downloadsSpan) downloadsSpan.textContent = `${fileInfo.downloads} download${fileInfo.downloads !== 1 ? 's' : ''}`;
+    if (uploadedSpan) {
+      // Use relative time for recent uploads, then switch to date
+      const now = new Date();
+      const uploadDate = new Date(fileInfo.uploaded);
+      const hoursDiff = Math.floor((now - uploadDate) / (1000 * 60 * 60));
+      const daysDiff = Math.floor(hoursDiff / 24);
+      
+      let displayText;
+      if (hoursDiff < 24) {
+        displayText = fileInfo.uploadedAgo; // "X hours ago"
+      } else if (daysDiff === 1) {
+        displayText = 'yesterday';
+      } else if (daysDiff < 7) {
+        displayText = `${daysDiff} days ago`;
+      } else {
+        // Format as date for older uploads
+        displayText = uploadDate.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+      }
+      uploadedSpan.textContent = displayText;
+    }
+    if (downloadsSpan) downloadsSpan.textContent = fileInfo.downloads;
   });
 }
 
@@ -52,8 +75,23 @@ async function trackDownload(filename) {
   }
 }
 
+// Track page view
+async function trackPageView() {
+  try {
+    const pagePath = window.location.pathname;
+    await fetch(`${TSMA_API_URL}/api/pageview/${encodeURIComponent(pagePath)}`, {
+      method: 'POST',
+    });
+  } catch (error) {
+    console.error('Error tracking page view:', error);
+  }
+}
+
 // Initialize file info loading on page load
 document.addEventListener('DOMContentLoaded', function() {
+  // Track page view
+  trackPageView();
+  
   // Find all file-details-box containers with data-name attribute
   const fileBoxes = document.querySelectorAll('.file-details-box[data-name]');
   
