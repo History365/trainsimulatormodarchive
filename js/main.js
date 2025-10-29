@@ -311,6 +311,8 @@ function updateMainGalleryImage(index) {
             requestAnimationFrame(() => {
                 mainImg.classList.remove('loading');
                 mainImg.dataset.transitioning = 'false';
+                // Maintain aspect ratio for new image
+                maintainGalleryAspectRatio();
             });
         };
         preloadImg.src = galleryImages[index];
@@ -639,6 +641,29 @@ function navigateLightbox(direction) {
     loadLightboxImage(currentIndex);
 }
 
+// Maintain aspect ratio for gallery main image
+function maintainGalleryAspectRatio() {
+    const mainImg = document.getElementById('mainDisplayImage');
+    const galleryMain = document.querySelector('.mod-gallery-main');
+    
+    if (!mainImg || !galleryMain || !mainImg.naturalWidth) return;
+    
+    // Get the natural aspect ratio of the image
+    const aspectRatio = mainImg.naturalHeight / mainImg.naturalWidth;
+    
+    // Get the current width of the container
+    const containerWidth = galleryMain.offsetWidth;
+    
+    // Calculate and set the height to maintain aspect ratio
+    const newHeight = containerWidth * aspectRatio;
+    galleryMain.style.height = newHeight + 'px';
+    
+    // Ensure the image fills the container while maintaining ratio
+    mainImg.style.width = '100%';
+    mainImg.style.height = '100%';
+    mainImg.style.objectFit = 'contain';
+}
+
 // Initialize gallery system
 function initGallerySystem() {
     // Build gallery array and setup fade-in
@@ -648,7 +673,19 @@ function initGallerySystem() {
     const mainImg = document.getElementById('mainDisplayImage');
     if (mainImg && galleryImages.length > 0) {
         mainImg.src = galleryImages[0];
+        
+        // Maintain aspect ratio on load and resize
+        mainImg.addEventListener('load', function() {
+            maintainGalleryAspectRatio();
+        });
     }
+    
+    // Add resize listener to maintain aspect ratio
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(maintainGalleryAspectRatio, 100);
+    });
     
     setupImageFadeIn();
     
