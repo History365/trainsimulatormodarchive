@@ -22,13 +22,24 @@ function animateValue(element, start, end, duration) {
 
 // Search functionality
 function initSearch() {
-    const searchInput = document.querySelector('.search-input');
-    if (!searchInput) return;
+    const desktopSearch = document.getElementById('searchInput');
+    const mobileSearch = document.getElementById('mobileSearchInput');
     
-    searchInput.addEventListener('input', debounce(function(e) {
-        // TODO: Implement search functionality
-        console.log('Search query:', e.target.value);
-    }, 300));
+    if (desktopSearch) {
+        desktopSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && this.value.trim()) {
+                window.location.href = `search.html?q=${encodeURIComponent(this.value.trim())}`;
+            }
+        });
+    }
+    
+    if (mobileSearch) {
+        mobileSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && this.value.trim()) {
+                window.location.href = `search.html?q=${encodeURIComponent(this.value.trim())}`;
+            }
+        });
+    }
 }
 
 // Utility function for debouncing
@@ -448,12 +459,10 @@ function updateActiveThumbnail(index) {
         thumb.classList.remove('active');
     });
     
-    // Add active class to current thumbnail (index - 1 because first image is main)
-    if (index > 0) {
-        const thumbs = document.querySelectorAll('.gallery-thumb');
-        if (thumbs[index - 1]) {
-            thumbs[index - 1].classList.add('active');
-        }
+    // Add active class to current thumbnail
+    const thumbs = document.querySelectorAll('.gallery-thumb');
+    if (thumbs[index]) {
+        thumbs[index].classList.add('active');
     }
 }
 
@@ -692,6 +701,16 @@ function initGallerySystem() {
     // Generate gallery dots
     generateGalleryDots();
     
+    // Set first thumbnail as active on page load
+    updateActiveThumbnail(0);
+    
+    // Only start auto-cycling if there's more than one image
+    if (galleryImages.length > 1) {
+        setTimeout(() => {
+            startMainGalleryAutoCycle();
+        }, 1000);
+    }
+    
     // Add click handler to main gallery image
     const mainGalleryDiv = document.querySelector('.mod-gallery-main');
     if (mainGalleryDiv) {
@@ -702,11 +721,6 @@ function initGallerySystem() {
             }
         });
     }
-    
-    // Start auto-cycling the main gallery after a short delay
-    setTimeout(() => {
-        startMainGalleryAutoCycle();
-    }, 1000);
     
     // Keyboard controls
     document.addEventListener('keydown', function(e) {
