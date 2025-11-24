@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Metadata Refresh History - TSMA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #181818;
+            color: #fff;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #4f76d9;
+        }
+        
+        .summary {
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .summary-item {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .summary-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f76d9;
+        }
+        
+        .summary-label {
+            font-size: 0.875rem;
+            color: #999;
+            margin-top: 0.25rem;
+        }
+        
+        .refresh-entry {
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .refresh-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333;
+        }
+        
+        .refresh-timestamp {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .refresh-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .stat {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            background: #1a1a1a;
+        }
+        
+        .stat.added { color: #4ade80; }
+        .stat.updated { color: #fbbf24; }
+        .stat.unchanged { color: #94a3b8; }
+        
+        .changes-section {
+            margin-top: 1rem;
+        }
+        
+        .changes-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mod-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+        
+        .mod-item {
+            background: #1a1a1a;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border-left: 3px solid #333;
+        }
+        
+        .mod-item.added { border-left-color: #4ade80; }
+        .mod-item.updated { border-left-color: #fbbf24; }
+        
+        .mod-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .mod-meta {
+            font-size: 0.875rem;
+            color: #999;
+        }
+        
+        .mod-changes {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #fbbf24;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+        
+        .error {
+            background: #dc2626;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .refresh-button {
+            background: #4f76d9;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 2rem;
+        }
+        
+        .refresh-button:hover {
+            background: #2a59c3;
+            transform: translateY(-2px);
+        }
+        
+        .refresh-button:disabled {
+            background: #333;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Metadata Refresh History</h1>
+        
+        <button class="refresh-button" onclick="triggerRefresh()" id="refreshBtn">
+            Trigger New Refresh
+        </button>
+        
+        <div class="summary" id="summary" style="display: none;">
+            <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Latest Refresh Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-number" id="totalMods">-</div>
+                    <div class="summary-label">Total Mods</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="addedCount" style="color: #4ade80;">-</div>
+                    <div class="summary-label">Added</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="updatedCount" style="color: #fbbf24;">-</div>
+                    <div class="summary-label">Updated</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="unchangedCount" style="color: #94a3b8;">-</div>
+                    <div class="summary-label">Unchanged</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="content">
+            <div class="loading">Loading refresh history...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.trainsimarchive.org';
+
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${API_URL}/api/the/the/the/refresh-history`);
+                const data = await response.json();
+
+                if (!data.success || !data.history || data.history.length === 0) {
+                    document.getElementById('content').innerHTML = '<div class="loading">No refresh history available yet.</div>';
+                    return;
+                }
+
+                // Show summary
+                const latest = data.history[0];
+                document.getElementById('summary').style.display = 'block';
+                document.getElementById('totalMods').textContent = latest.totalMods || 0;
+                document.getElementById('addedCount').textContent = latest.added.length;
+                document.getElementById('updatedCount').textContent = latest.updated.length;
+                document.getElementById('unchangedCount').textContent = latest.unchanged.length;
+
+                // Render history
+                let html = '';
+                data.history.forEach(entry => {
+                    html += renderRefreshEntry(entry);
+                });
+
+                document.getElementById('content').innerHTML = html;
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<div class="error">Error loading history: ${error.message}</div>`;
+            }
+        }
+
+        function renderRefreshEntry(entry) {
+            const date = new Date(entry.timestamp);
+            const formattedDate = date.toLocaleString();
+
+            let html = `
+                <div class="refresh-entry">
+                    <div class="refresh-header">
+                        <div class="refresh-timestamp">${formattedDate}</div>
+                        <div class="refresh-stats">
+                            <span class="stat added">+${entry.added.length} Added</span>
+                            <span class="stat updated">↻${entry.updated.length} Updated</span>
+                            <span class="stat unchanged">${entry.unchanged.length} Unchanged</span>
+                        </div>
+                    </div>
+            `;
+
+            // Added mods
+            if (entry.added.length > 0) {
+                html += `
+                    <div class="changes-section">
+                        <div class="changes-title">Added Mods</div>
+                        <div class="mod-list">
+                `;
+                entry.added.forEach(mod => {
+                    html += `
+                        <div class="mod-item added">
+                            <div class="mod-title">${mod.title}</div>
+                            <div class="mod-meta">ID: ${mod.id} • Category: ${mod.category}</div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+            }
+
+            // Updated mods
+            if (entry.updated.length > 0) {
+                html += `
+                    <div class="changes-section">
+                        <div class="changes-title">Updated Mods</div>
+                        <div class="mod-list">
+                `;
+                entry.updated.forEach(mod => {
+                    const changes = [];
+                    if (mod.changes.title) changes.push('title');
+                    if (mod.changes.description) changes.push('description');
+                    if (mod.changes.image) changes.push('image');
+                    if (mod.changes.tags) changes.push('tags');
+
+                    html += `
+                        <div class="mod-item updated">
+                            <div class="mod-title">${mod.title}</div>
+                            <div class="mod-meta">ID: ${mod.id}</div>
+                            <div class="mod-changes">Changed: ${changes.join(', ')}</div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function triggerRefresh() {
+            const btn = document.getElementById('refreshBtn');
+            btn.disabled = true;
+            btn.textContent = 'Refreshing...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/refresh-metadata`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`Refresh complete!\nAdded: ${data.summary.added}\nUpdated: ${data.summary.updated}\nUnchanged: ${data.summary.unchanged}`);
+                    loadHistory();
+                } else {
+                    alert('Refresh failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error triggering refresh: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Trigger New Refresh';
+            }
+        }
+
+        // Load on page load
+        loadHistory();
+    </script>
+</body>
+</html>

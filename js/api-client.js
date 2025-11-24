@@ -67,11 +67,36 @@ async function updateFileDetails(filename, targetSelector = '.file-details-box')
 // Track download when clicked
 async function trackDownload(filename) {
   try {
-    await fetch(`${TSMA_API_URL}/api/download/${encodeURIComponent(filename)}`, {
+    console.log('Tracking download for:', filename);
+    const response = await fetch(`${TSMA_API_URL}/api/download/${encodeURIComponent(filename)}`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      keepalive: true, // Keep connection alive even if page unloads
     });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Download tracked successfully:', data);
+      return true;
+    } else {
+      console.error('Failed to track download:', response.status, response.statusText);
+      return false;
+    }
   } catch (error) {
     console.error('Error tracking download:', error);
+    // Fallback: use sendBeacon if fetch fails (browser navigation)
+    try {
+      const url = `${TSMA_API_URL}/api/download/${encodeURIComponent(filename)}`;
+      const blob = new Blob(['{}'], { type: 'application/json' });
+      const sent = navigator.sendBeacon(url, blob);
+      console.log('Beacon sent:', sent);
+      return sent;
+    } catch (beaconError) {
+      console.error('Beacon also failed:', beaconError);
+      return false;
+    }
   }
 }
 
@@ -102,17 +127,143 @@ document.addEventListener('DOMContentLoaded', function() {
       updateFileDetails(filename, `.file-details-box[data-name="${filename}"]`);
     }
   });
+  
+  // Auto-load related mods if container exists
+  const relatedModsContainer = document.getElementById('related-mods-container');
+  if (relatedModsContainer) {
+    loadRelatedMods(); // Will auto-detect mod ID from URL
+  }
 });
 
 // Enhance existing download click handler to track downloads
-document.addEventListener('click', function(e) {
+document.addEventListener('click', async function(e) {
   if (e.target.classList.contains('download-trigger') || e.target.closest('.download-trigger')) {
     const btn = e.target.classList.contains('download-trigger') ? e.target : e.target.closest('.download-trigger');
-    const filename = btn.dataset.name;
     
-    if (filename) {
-      // Track the download
-      trackDownload(filename);
+    // Get the download URL first
+    const downloadUrl = btn.dataset.url || btn.getAttribute('href');
+    
+    if (downloadUrl && downloadUrl !== '#') {
+      // Prevent default to stop immediate navigation
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Extract filename from URL (decode URI to get actual filename)
+      let filename;
+      try {
+        const urlObj = new URL(downloadUrl);
+        filename = decodeURIComponent(urlObj.pathname.split('/').pop());
+      } catch (err) {
+        // Fallback to data-name if URL parsing fails
+        filename = btn.dataset.name;
+      }
+      
+      if (filename) {
+        // Track the download and wait for it
+        console.log('Download button clicked, tracking:', filename);
+        await trackDownload(filename);
+        
+        // Now allow the download to proceed
+        console.log('Opening download URL:', downloadUrl);
+        window.location.href = downloadUrl;
+      }
     }
   }
 }, true); // Use capture phase to run before other handlers
+
+// Auto-detect mod ID from URL
+function getModIdFromUrl() {
+  const path = window.location.pathname;
+  const match = path.match(/\/([^\/]+)\.html$/);
+  return match ? match[1] : null;
+}
+
+// Load and display related mods with caching
+async function loadRelatedMods(modId) {
+  const container = document.getElementById('related-mods-container');
+  
+  if (!container) return;
+  
+  // Auto-detect mod ID if not provided
+  if (!modId) {
+    modId = getModIdFromUrl();
+    if (!modId) return;
+  }
+  
+  // Check localStorage cache first
+  const cacheKey = `related_mods_${modId}`;
+  const cachedData = localStorage.getItem(cacheKey);
+  
+  if (cachedData) {
+    try {
+      const cached = JSON.parse(cachedData);
+      // Check if cache is less than 1 hour old
+      if (Date.now() - cached.timestamp < 3600000) {
+        renderRelatedMods(cached.data, container);
+        return;
+      }
+    } catch (e) {
+      // Invalid cache, continue to fetch
+    }
+  }
+  
+  // No loading state - container stays empty until data arrives
+  try {
+    const response = await fetch(`${TSMA_API_URL}/api/related/${encodeURIComponent(modId)}`);
+    
+    if (!response.ok) {
+      console.error('Failed to fetch related mods');
+      return;
+    }
+    
+    const data = await response.json();
+    
+    if (!data.relatedMods || data.relatedMods.length === 0) {
+      return;
+    }
+    
+    // Cache the data
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({
+        timestamp: Date.now(),
+        data: data.relatedMods
+      }));
+    } catch (e) {
+      // Storage quota exceeded, ignore
+    }
+    
+    renderRelatedMods(data.relatedMods, container);
+  } catch (error) {
+    console.error('Error loading related mods:', error);
+  }
+}
+
+// Render related mods HTML
+function renderRelatedMods(relatedMods, container) {
+  let html = '<div class="related-mods-section">';
+  html += '<h2 class="related-mods-title">Related Mods</h2>';
+  html += '<div class="related-mods-grid">';
+  
+  relatedMods.forEach(mod => {
+    // If we're already in the same directory, just use the filename
+    // e.g., if viewing trurail-simulations/csx-road-bundle.html, link to just "adriana-county-bundle.html"
+    let relativeUrl = mod.url;
+    
+    // Extract just the filename if the URL contains a path
+    if (mod.url.includes('/')) {
+      relativeUrl = mod.url.split('/').pop(); // Get just the filename
+    }
+    
+    html += `
+      <a href="${relativeUrl}" class="related-mod-card">
+        <div class="related-mod-image" style="background-image: url('${mod.image}');"></div>
+        <div class="related-mod-content">
+          <h3 class="related-mod-title">${mod.title}</h3>
+        </div>
+      </a>
+    `;
+  });
+  
+  html += '</div></div>';
+  container.innerHTML = html;
+}

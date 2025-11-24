@@ -306,14 +306,13 @@ a:hover {
     color: var(--text-color);
     font-size: 0.875rem;
     padding: 0.4rem 0.875rem;
-    width: 180px;
+    width: 220px;
     border-radius: 0.5rem;
-    transition: width 0.3s ease, border-color 0.2s ease;
+    transition: border-color 0.2s ease;
     font-family: 'Inter', sans-serif;
 }
 
 .search-input:focus {
-    width: 220px;
     outline: none;
     border-color: var(--highlight-border);
     box-shadow: 0 0 0 2px rgba(96, 96, 96, 0.3);
@@ -1514,17 +1513,28 @@ body {
     background: #222;
     border: 1px solid #2a2a2a;
     border-radius: 10px;
-    overflow: hidden;
+    overflow: visible;
     text-decoration: none;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .mod-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
     border-color: #4a4a4a;
+    z-index: 10;
+}
+
+.mod-card > .mod-card-link,
+.mod-card > .mod-card-content {
+    border-radius: 10px;
+}
+
+.mod-card > .mod-card-link .mod-card-image {
+    border-radius: 10px 10px 0 0;
 }
 
 .mod-card-image {
@@ -1557,6 +1567,214 @@ body {
     line-height: 1.7;
     margin: 0;
     flex-grow: 1;
+}
+
+/* Steam-Style Hover Card */
+/* Hover Card Overlay - Matching Site Theme */
+.steam-hover-card {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 600px;
+    height: 440px;
+    background: #222;
+    border-radius: 10px;
+    border: 1px solid #2a2a2a;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+.mod-card-link:hover .mod-card-image ~ .steam-hover-card,
+.mod-card-link:hover ~ .steam-hover-card,
+.mod-card:has(.mod-card-link:hover) .steam-hover-card {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.steam-hover-main-image {
+    width: 100%;
+    height: 280px;
+    position: relative;
+    overflow: hidden;
+    background: #1a1a1a;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.steam-hover-main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.steam-hover-main-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, rgba(34, 34, 34, 0.6));
+    pointer-events: none;
+}
+
+.steam-wishlist-icon {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 28px;
+    height: 28px;
+    color: rgba(255, 255, 255, 0.4);
+    z-index: 10;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.steam-wishlist-icon:hover {
+    color: #4f76d9;
+    transform: scale(1.1);
+}
+
+.steam-divider {
+    display: none;
+}
+
+.steam-hover-bottom {
+    height: 160px;
+    width: 100%;
+    background: #222;
+    display: flex;
+    align-items: flex-start;
+    padding: 20px;
+    padding-left: 240px;
+    gap: 20px;
+    position: relative;
+}
+
+.steam-dlc-thumbnail {
+    position: absolute;
+    top: -40px;
+    left: 20px;
+    width: 200px;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7), 0 0 0 3px #222;
+    flex-shrink: 0;
+    background: #1a1a1a;
+    z-index: 10;
+    transition: transform 0.2s ease;
+    border: 1px solid #2a2a2a;
+}
+
+.steam-dlc-thumbnail:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.8), 0 0 0 3px #222;
+}
+
+.steam-dlc-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.steam-dlc-ribbon {
+    display: none;
+}
+
+.steam-dlc-ribbon::after {
+    display: none;
+}
+
+.steam-logo-overlay {
+    display: none;
+}
+
+.steam-logo-text {
+    display: none;
+}
+
+.steam-logo-subtitle {
+    display: none;
+}
+
+.steam-dlc-thumbnail::before {
+    display: none;
+}
+
+.steam-info-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 12px;
+    min-width: 0;
+    padding-top: 10px;
+}
+
+.steam-info-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #fff;
+    margin: 0;
+}
+
+.steam-info-description {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #999;
+    margin: 0;
+}
+
+.steam-tags-row {
+    display: none;
+}
+
+.steam-tag {
+    display: none;
+}
+
+.steam-price-section {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-shrink: 0;
+    padding-top: 10px;
+}
+
+.steam-download-btn {
+    background: #222;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid #2a2a2a;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.steam-download-btn:hover {
+    background: #2a2a2a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border-color: #4a4a4a;
+    color: white;
+    text-decoration: none;
 }
 
 .mod-exconrail-section {
@@ -3184,5 +3402,329 @@ body {
     
     .file-icon {
         margin-bottom: 0.5rem;
+    }
+}
+
+/* Related Mods Section */
+.related-mods-section {
+    margin: 3rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #333;
+}
+
+.related-mods-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 1.5rem 0;
+}
+
+.related-mods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.related-mod-card {
+    background: #222;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+}
+
+.related-mod-card:hover {
+    transform: translateY(-4px);
+    border-color: #4a4a4a;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.related-mod-image {
+    width: 100%;
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    background-color: #1a1a1a;
+}
+
+.related-mod-content {
+    padding: 1rem;
+}
+
+.related-mod-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.related-mods-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .related-mods-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .related-mod-image {
+        height: 140px;
+    }
+    
+    .related-mod-title {
+        font-size: 14px;
+    }
+}
+
+/* Search Results Page */
+.search-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #2a2a2a;
+    border-left: 3px solid #4f76d9;
+    padding: 1rem 1.25rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+}
+
+.search-suggestion i {
+    color: #4f76d9;
+    font-size: 18px;
+}
+
+.search-suggestion span {
+    color: #9ca3af;
+}
+
+.search-suggestion a {
+    color: #4f76d9;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.search-suggestion a:hover {
+    color: #6a8eeb;
+    text-decoration: underline;
+}
+
+.search-loading {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #9ca3af;
+}
+
+.search-loading i {
+    font-size: 48px;
+    margin-bottom: 1rem;
+    color: #4f76d9;
+}
+
+.search-no-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #9ca3af;
+}
+
+.search-no-results h3 {
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+.search-no-results a {
+    color: #4f76d9;
+    text-decoration: none;
+}
+
+.search-no-results a:hover {
+    text-decoration: underline;
+}
+
+.search-error {
+    text-align: center;
+    padding: 2rem;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+#searchResults {
+    min-height: 400px;
+}
+
+/* Homepage Styles */
+.home-page-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem 3rem;
+}
+
+.home-hero {
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.home-hero-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 1.5rem 0;
+}
+
+.home-hero-description {
+    font-size: 16px;
+    color: #bbb;
+    line-height: 1.8;
+    max-width: 900px;
+    margin: 0 auto 1rem;
+}
+
+.home-stats {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 2rem;
+    background: #202020;
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+
+.home-stat-item {
+    text-align: center;
+}
+
+.home-stat-number {
+    font-size: 36px;
+    font-weight: 700;
+    color: #4f76d9;
+    margin-bottom: 0.5rem;
+}
+
+.home-stat-label {
+    font-size: 14px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.home-featured {
+    margin: 3rem 0;
+}
+
+.home-section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+}
+
+.home-section-subtitle {
+    font-size: 14px;
+    color: #888;
+    margin: 0 0 2rem 0;
+}
+
+.home-mods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.home-mod-card {
+    background: #222;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+}
+
+.home-mod-card:hover {
+    transform: translateY(-4px);
+    border-color: #4a4a4a;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.home-mod-image {
+    width: 100%;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    background-color: #1a1a1a;
+}
+
+.home-mod-info {
+    padding: 1.25rem;
+}
+
+.home-mod-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.4;
+}
+
+.home-mod-description {
+    font-size: 14px;
+    color: #999;
+    line-height: 1.6;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .home-hero-title {
+        font-size: 32px;
+    }
+    
+    .home-hero-description {
+        font-size: 14px;
+    }
+    
+    .home-stats {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .home-stat-number {
+        font-size: 28px;
+    }
+    
+    .home-section-title {
+        font-size: 24px;
+    }
+    
+    .home-mods-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .home-mod-image {
+        height: 150px;
+    }
+    
+    .home-mod-title {
+        font-size: 16px;
     }
 }

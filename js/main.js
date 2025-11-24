@@ -28,7 +28,26 @@ function initSearch() {
     if (desktopSearch) {
         desktopSearch.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && this.value.trim()) {
-                window.location.href = `search.html?q=${encodeURIComponent(this.value.trim())}`;
+                const query = encodeURIComponent(this.value.trim());
+                // Strip hash and query params from pathname
+                const currentPath = window.location.pathname.split('#')[0].split('?')[0];
+                
+                // Get the filename from the path
+                const fileName = currentPath.split('/').pop();
+                
+                // Check if we're in a subdirectory by checking if the path contains a folder before the file
+                // For file:///C:/Websites/trainsimulatormodarchive/trurail-simulations/file.html
+                // the pathname will include the folder before the .html file
+                const pathWithoutFile = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                const folderName = pathWithoutFile.split('/').pop();
+                
+                // If the folder name exists and isn't the root, we're in a subdirectory
+                const isInSubdirectory = folderName && folderName !== 'trainsimulatormodarchive';
+                
+                // Determine correct path to search.html
+                const searchPath = isInSubdirectory ? '../search.html' : 'search.html';
+                
+                window.location.href = `${searchPath}?q=${query}`;
             }
         });
     }
@@ -36,7 +55,24 @@ function initSearch() {
     if (mobileSearch) {
         mobileSearch.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && this.value.trim()) {
-                window.location.href = `search.html?q=${encodeURIComponent(this.value.trim())}`;
+                const query = encodeURIComponent(this.value.trim());
+                // Strip hash and query params from pathname
+                const currentPath = window.location.pathname.split('#')[0].split('?')[0];
+                
+                // Get the filename from the path
+                const fileName = currentPath.split('/').pop();
+                
+                // Check if we're in a subdirectory by checking if the path contains a folder before the file
+                const pathWithoutFile = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                const folderName = pathWithoutFile.split('/').pop();
+                
+                // If the folder name exists and isn't the root, we're in a subdirectory
+                const isInSubdirectory = folderName && folderName !== 'trainsimulatormodarchive';
+                
+                // Determine correct path to search.html
+                const searchPath = isInSubdirectory ? '../search.html' : 'search.html';
+                
+                window.location.href = `${searchPath}?q=${query}`;
             }
         });
     }
@@ -994,4 +1030,45 @@ function toggleSection(sectionId) {
         content.style.display = 'none';
         icon.style.transform = 'rotate(-90deg)';
     }
+}
+
+// Homepage: Load random featured mods
+async function loadRandomMods() {
+    const grid = document.getElementById('featuredModsGrid');
+    const totalModsEl = document.getElementById('totalMods');
+    
+    if (!grid) return;
+    
+    try {
+        const response = await fetch('https://api.trainsimarchive.org/api/random-mods?count=4');
+        const data = await response.json();
+        
+        if (data.success && data.mods && data.mods.length > 0) {
+            // Update total mods count
+            if (totalModsEl && data.total) {
+                totalModsEl.textContent = data.total.toLocaleString();
+            }
+            
+            // Render mod cards
+            grid.innerHTML = data.mods.map(mod => `
+                <a href="${mod.url}" class="home-mod-card">
+                    <div class="home-mod-image" style="background-image: url('${mod.image}')"></div>
+                    <div class="home-mod-info">
+                        <h3 class="home-mod-title">${mod.title}</h3>
+                        <p class="home-mod-description">${mod.description}</p>
+                    </div>
+                </a>
+            `).join('');
+        } else {
+            grid.innerHTML = '<p style="text-align: center; color: #888;">No mods available at this time.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading random mods:', error);
+        grid.innerHTML = '<p style="text-align: center; color: #888;">Error loading mods.</p>';
+    }
+}
+
+// Initialize homepage features
+if (document.getElementById('featuredModsGrid')) {
+    loadRandomMods();
 }
