@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
                 window.scrollTo({
-                    top: targetElement.offsetTop - 70, // Offset for fixed header
+                    top: targetElement.offsetTop - 120, // Offset for fixed header (navbar + padding)
                     behavior: 'smooth'
                 });
             }
@@ -385,8 +385,6 @@ function updateMainGalleryImage(index) {
             requestAnimationFrame(() => {
                 mainImg.classList.remove('loading');
                 mainImg.dataset.transitioning = 'false';
-                // Maintain aspect ratio for new image
-                maintainGalleryAspectRatio();
             });
         };
         preloadImg.src = galleryImages[index];
@@ -713,22 +711,26 @@ function navigateLightbox(direction) {
     loadLightboxImage(currentIndex);
 }
 
+// Set a universal fixed height for all gallery carousels
+function setGalleryFixedHeight() {
+    const galleryMain = document.querySelector('.mod-gallery-main');
+    if (!galleryMain) return;
+    
+    // Set a fixed height for all galleries (16:9 aspect ratio based on container width)
+    const containerWidth = galleryMain.offsetWidth;
+    const fixedHeight = containerWidth * 0.5625; // 16:9 aspect ratio (9/16 = 0.5625)
+    
+    galleryMain.style.height = fixedHeight + 'px';
+    galleryMain.style.minHeight = fixedHeight + 'px';
+    galleryMain.style.maxHeight = fixedHeight + 'px';
+}
+
 // Maintain aspect ratio for gallery main image
 function maintainGalleryAspectRatio() {
     const mainImg = document.getElementById('mainDisplayImage');
     const galleryMain = document.querySelector('.mod-gallery-main');
     
-    if (!mainImg || !galleryMain || !mainImg.naturalWidth) return;
-    
-    // Get the natural aspect ratio of the image
-    const aspectRatio = mainImg.naturalHeight / mainImg.naturalWidth;
-    
-    // Get the current width of the container
-    const containerWidth = galleryMain.offsetWidth;
-    
-    // Calculate and set the height to maintain aspect ratio
-    const newHeight = containerWidth * aspectRatio;
-    galleryMain.style.height = newHeight + 'px';
+    if (!mainImg || !galleryMain) return;
     
     // Ensure the image fills the container while maintaining ratio
     mainImg.style.width = '100%';
@@ -746,17 +748,23 @@ function initGallerySystem() {
     if (mainImg && galleryImages.length > 0) {
         mainImg.src = galleryImages[0];
         
-        // Maintain aspect ratio on load and resize
+        // Maintain aspect ratio on load
         mainImg.addEventListener('load', function() {
             maintainGalleryAspectRatio();
         });
     }
     
-    // Add resize listener to maintain aspect ratio
+    // Calculate and set fixed height based on tallest image
+    setGalleryFixedHeight();
+    
+    // Add resize listener to recalculate fixed height
     let resizeTimeout;
     window.addEventListener('resize', function() {
         clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(maintainGalleryAspectRatio, 100);
+        resizeTimeout = setTimeout(() => {
+            setGalleryFixedHeight();
+            maintainGalleryAspectRatio();
+        }, 100);
     });
     
     setupImageFadeIn();
