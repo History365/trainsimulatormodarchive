@@ -4,6 +4,8 @@
  * Last updated: October 24, 2025
  */
 
+console.log('main.js loaded');
+
 // Archive Statistics Counter Animation
 function animateValue(element, start, end, duration) {
     const range = end - start;
@@ -93,6 +95,8 @@ function debounce(func, wait) {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - main.js running');
+    
     // Initialize tooltips and popovers
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
@@ -160,8 +164,31 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Show cookie banner if needed
+    const consent = getCookieConsent();
+    console.log('Cookie consent status:', consent);
+    if (consent === null) {
+        console.log('No consent found, showing banner');
+        showCookieBanner();
+    } else {
+        console.log('Consent already given:', consent);
+    }
+    
     // Initialize search
-    initSearch();
+    console.log('About to call initSearch()');
+    try {
+        initSearch();
+        console.log('initSearch() completed');
+    } catch (error) {
+        console.error('Error in initSearch():', error);
+    }
+    
+    // Load random mods on homepage
+    console.log('About to call loadRandomMods()');
+    loadRandomMods();
+    
+    // Load archive statistics
+    loadArchiveStats();
     
     // Fade-in animation for content sections
     const fadeElements = document.querySelectorAll('.fade-in');
@@ -1032,43 +1059,278 @@ function toggleSection(sectionId) {
     }
 }
 
+// Cookie consent management
+function getCookieConsent() {
+    // Check actual browser cookie first
+    const cookieConsent = document.cookie.split('; ').find(row => row.startsWith('cookieConsent='));
+    if (cookieConsent) {
+        const value = cookieConsent.split('=')[1];
+        console.log('Found consent in cookie:', value);
+        return value;
+    }
+    
+    // Check sessionStorage
+    const sessionConsent = sessionStorage.getItem('cookieConsent');
+    if (sessionConsent) {
+        console.log('Found consent in sessionStorage:', sessionConsent);
+        return sessionConsent;
+    }
+    
+    // Then check localStorage
+    const consent = localStorage.getItem('cookieConsent');
+    const consentDate = localStorage.getItem('cookieConsentDate');
+    console.log('Checking localStorage - consent:', consent, 'date:', consentDate);
+    
+    if (!consent || !consentDate) return null;
+    
+    // Check if consent is older than 90 days
+    const daysSinceConsent = (Date.now() - parseInt(consentDate)) / (1000 * 60 * 60 * 24);
+    if (daysSinceConsent > 90) {
+        localStorage.removeItem('cookieConsent');
+        localStorage.removeItem('cookieConsentDate');
+        document.cookie = 'cookieConsent=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        return null;
+    }
+    
+    // Store in session for this browsing session
+    sessionStorage.setItem('cookieConsent', consent);
+    return consent;
+}
+
+function setCookieConsent(accepted) {
+    const consentValue = accepted ? 'accepted' : 'denied';
+    const dateValue = Date.now().toString();
+    console.log('Setting cookie consent:', consentValue, 'date:', dateValue);
+    
+    // Set actual browser cookie (expires in 90 days)
+    const expiryDate = new Date();
+    expiryDate.setTime(expiryDate.getTime() + (90 * 24 * 60 * 60 * 1000));
+    document.cookie = `cookieConsent=${consentValue}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+    console.log('Saved to cookie');
+    
+    // Store in localStorage
+    try {
+        localStorage.setItem('cookieConsent', consentValue);
+        localStorage.setItem('cookieConsentDate', dateValue);
+        console.log('Saved to localStorage');
+    } catch (e) {
+        console.warn('localStorage not available:', e);
+    }
+    
+    // Always save to sessionStorage as fallback
+    sessionStorage.setItem('cookieConsent', consentValue);
+    sessionStorage.setItem('cookieConsentDate', dateValue);
+    console.log('Saved to sessionStorage');
+}
+
+function showCookieBanner() {
+    const banner = document.createElement('div');
+    banner.id = 'cookieBanner';
+    banner.innerHTML = `
+        <div style="position: fixed; bottom: 20px; right: 20px; max-width: 420px; background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 24px; z-index: 10000; box-shadow: 0 8px 32px rgba(0,0,0,0.6); font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                <h3 style="color: #fff; margin: 0; font-size: 18px; font-weight: 600;">Cookie Notice</h3>
+                <button id="closeBanner" style="background: transparent; color: #888; border: none; padding: 0; cursor: pointer; font-size: 24px; line-height: 1; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; transition: color 0.2s;">
+                    ×
+                </button>
+            </div>
+            <p style="color: #aaa; margin: 0 0 20px 0; font-size: 14px; line-height: 1.6;">
+                This site uses cookies and local storage for essential functions needed for a smooth experience. 
+                <span style="color: #888; display: block; margin-top: 8px; font-size: 13px;">
+                    Denying may cause user features to not work properly which may ruin your experience.
+                </span>
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <button id="acceptCookies" style="flex: 1; background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s;">
+                    Accept
+                </button>
+                <button id="denyCookies" style="flex: 1; background: #2a2a2a; color: #ccc; border: 1px solid #444; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+                    Deny
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(banner);
+    
+    // Add hover effects
+    const acceptBtn = document.getElementById('acceptCookies');
+    const denyBtn = document.getElementById('denyCookies');
+    const closeBtn = document.getElementById('closeBanner');
+    
+    acceptBtn.addEventListener('mouseenter', () => {
+        acceptBtn.style.background = '#333';
+        acceptBtn.style.borderColor = '#555';
+    });
+    acceptBtn.addEventListener('mouseleave', () => {
+        acceptBtn.style.background = '#2a2a2a';
+        acceptBtn.style.borderColor = '#444';
+    });
+    
+    denyBtn.addEventListener('mouseenter', () => {
+        denyBtn.style.background = '#333';
+        denyBtn.style.borderColor = '#555';
+    });
+    denyBtn.addEventListener('mouseleave', () => {
+        denyBtn.style.background = '#2a2a2a';
+        denyBtn.style.borderColor = '#444';
+    });
+    
+    closeBtn.addEventListener('mouseenter', () => closeBtn.style.color = '#fff');
+    closeBtn.addEventListener('mouseleave', () => closeBtn.style.color = '#888');
+    
+    acceptBtn.addEventListener('click', () => {
+        setCookieConsent(true);
+        banner.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => banner.remove(), 300);
+    });
+    
+    denyBtn.addEventListener('click', () => {
+        setCookieConsent(false);
+        banner.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => banner.remove(), 300);
+    });
+    
+    closeBtn.addEventListener('click', () => {
+        banner.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => banner.remove(), 300);
+    });
+    
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(100px); opacity: 0; }
+        }
+        #cookieBanner > div {
+            animation: slideIn 0.4s ease-out;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 // Homepage: Load random featured mods
 async function loadRandomMods() {
-    const grid = document.getElementById('featuredModsGrid');
-    const totalModsEl = document.getElementById('totalMods');
+    console.log('loadRandomMods called');
+    const container = document.getElementById('randomModsContainer');
+    console.log('Container:', container);
     
-    if (!grid) return;
+    if (!container) {
+        console.log('randomModsContainer not found');
+        return;
+    }
+    
+    // Check cookie consent for localStorage usage
+    const consent = getCookieConsent();
+    const canUseStorage = consent === 'accepted' || consent === null;
     
     try {
+        console.log('Fetching random mods...');
         const response = await fetch('https://api.trainsimarchive.org/api/random-mods?count=4');
+        console.log('Response:', response.status);
         const data = await response.json();
+        console.log('Data received:', data);
         
-        if (data.success && data.mods && data.mods.length > 0) {
-            // Update total mods count
-            if (totalModsEl && data.total) {
-                totalModsEl.textContent = data.total.toLocaleString();
+        let mods = data.mods || data;
+        console.log('Mods array:', mods);
+        
+        // Get previously shown mods (only if consent given)
+        if (canUseStorage) {
+            const lastShown = JSON.parse(sessionStorage.getItem('lastShownMods') || '[]');
+            console.log('Last shown mods:', lastShown);
+            
+            // Filter out previously shown mods if possible
+            const newMods = mods.filter(mod => !lastShown.includes(mod.id || mod.title));
+            
+            // If we have enough new mods, use them; otherwise use all mods
+            if (newMods.length >= 4) {
+                mods = newMods.slice(0, 4);
             }
             
-            // Render mod cards
-            grid.innerHTML = data.mods.map(mod => `
-                <a href="${mod.url}" class="home-mod-card">
-                    <div class="home-mod-image" style="background-image: url('${mod.image}')"></div>
-                    <div class="home-mod-info">
-                        <h3 class="home-mod-title">${mod.title}</h3>
-                        <p class="home-mod-description">${mod.description}</p>
-                    </div>
-                </a>
-            `).join('');
-        } else {
-            grid.innerHTML = '<p style="text-align: center; color: #888;">No mods available at this time.</p>';
+            // Save current mods to session storage
+            sessionStorage.setItem('lastShownMods', JSON.stringify(mods.map(m => m.id || m.title)));
         }
+        
+        console.log('First mod creator:', mods[0]?.creator);
+        
+        // Map creator slugs to display names
+        const creatorNames = {
+            'trurail': 'TruRail Simulations',
+            'cleartracks': 'ClearTracks',
+            'uts-creations': 'UTS Creations',
+            'east-coast-simulations': 'East Coast Simulations',
+            'virtual-rail-creations': 'Virtual Rail Creations'
+        };
+        
+        container.innerHTML = mods.map(mod => {
+            const creatorDisplay = creatorNames[mod.creator] || mod.creator;
+            const creatorLink = mod.creator === 'trurail' ? 'trurail-simulations.html' : `${mod.creator}.html`;
+            return `
+            <div class="card">
+                <img src="${mod.image || 'https://files.trainsimarchive.org/media/tsma-logo.png'}" 
+                     alt="${mod.title}" 
+                     class="thumbnail" 
+                     onclick="window.location='${mod.url}'">
+                <div class="mt-2 text-base title clickable">
+                    <a href="${mod.url}" class="text-white hover:underline">${mod.title}</a>
+                </div>
+                <div class="text-gray-400 author clickable">
+                    <a href="${creatorLink}" class="hover:underline">${creatorDisplay}</a>
+                </div>
+            </div>
+        `;
+        }).join('');
+        console.log('Mods rendered successfully');
+        
+        // Fade in the container
+        setTimeout(() => {
+            container.style.opacity = '1';
+        }, 100);
     } catch (error) {
         console.error('Error loading random mods:', error);
-        grid.innerHTML = '<p style="text-align: center; color: #888;">Error loading mods.</p>';
+        container.innerHTML = '<p class="text-gray-400">Unable to load random mods. Please refresh the page.</p>';
+        container.style.opacity = '1';
     }
 }
 
-// Initialize homepage features
-if (document.getElementById('featuredModsGrid')) {
-    loadRandomMods();
+// Load archive statistics
+async function loadArchiveStats() {
+    const statsEl = document.getElementById('archiveStats');
+    if (!statsEl) return;
+    
+    try {
+        const response = await fetch('https://api.trainsimarchive.org/api/random-mods?count=1');
+        const data = await response.json();
+        
+        if (data.total) {
+            // Get server date from response headers or use current date
+            const lastRefreshResponse = await fetch('https://api.trainsimarchive.org/api/the/the/the/refresh-history');
+            const refreshData = await lastRefreshResponse.json();
+            
+            let dateStr = new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+            
+            if (refreshData.logs && refreshData.logs.length > 0) {
+                const lastRefresh = new Date(refreshData.logs[0].timestamp);
+                dateStr = lastRefresh.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+            }
+            
+            statsEl.textContent = `We have archived ${data.total} Mods as of ${dateStr}`;
+        } else {
+            statsEl.textContent = 'We have archived 172 Mods as of 6/15/25';
+        }
+        
+        // Fade in the stats
+        setTimeout(() => {
+            statsEl.style.opacity = '1';
+        }, 100);
+    } catch (error) {
+        console.error('Error loading archive stats:', error);
+        statsEl.textContent = 'We have archived 172 Mods as of 6/15/25';
+        statsEl.style.opacity = '1';
+    }
 }

@@ -35,8 +35,16 @@ async function updateFileDetails(filename, targetSelector = '.file-details-box')
     const uploadedSpan = container.querySelector('[data-file-uploaded]');
     const downloadsSpan = container.querySelector('[data-file-downloads]');
     
-    if (sizeSpan) sizeSpan.textContent = fileInfo.sizeFormatted;
+    if (sizeSpan) {
+      sizeSpan.style.opacity = '0';
+      sizeSpan.style.transition = 'opacity 0.5s ease-in';
+      sizeSpan.textContent = fileInfo.sizeFormatted;
+      setTimeout(() => sizeSpan.style.opacity = '1', 100);
+    }
     if (uploadedSpan) {
+      uploadedSpan.style.opacity = '0';
+      uploadedSpan.style.transition = 'opacity 0.5s ease-in';
+      
       // Use relative time for recent uploads, then switch to date
       const now = new Date();
       const uploadDate = new Date(fileInfo.uploaded);
@@ -59,8 +67,14 @@ async function updateFileDetails(filename, targetSelector = '.file-details-box')
         });
       }
       uploadedSpan.textContent = displayText;
+      setTimeout(() => uploadedSpan.style.opacity = '1', 100);
     }
-    if (downloadsSpan) downloadsSpan.textContent = fileInfo.downloads;
+    if (downloadsSpan) {
+      downloadsSpan.style.opacity = '0';
+      downloadsSpan.style.transition = 'opacity 0.5s ease-in';
+      downloadsSpan.textContent = fileInfo.downloads;
+      setTimeout(() => downloadsSpan.style.opacity = '1', 100);
+    }
   });
 }
 

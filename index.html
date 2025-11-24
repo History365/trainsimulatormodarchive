@@ -75,52 +75,12 @@
             </section>
             <section>
                 <div class="space-y-6">
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="card">
-                            <img src=https://lh3.googleusercontent.com/sitesv/AICyYdZPNHYcUnDozqD8-mAaFQTZJYLYypYcq8doHgoH8C5-w6fGVdDOMJ-t1Nm0vXjOISbCP-hAeesR5k3006UlTih5mHIISbr65pm-ja3mslTbZA5-rk7W9OcDAjXmyDGEQkUmXxT7calsNMNpzErnPGGMdoFu9EI0Ut-xIHZxssGvT6md6UpWbJ0Oc-2fTv90jhmcfHcfvkllU6v3vmRF2AgvMFMUpL3WWwCdLQ0=w1280" alt="Metra F59PHI Pack" class="thumbnail" onclick="window.location='trurail-simulations/metra-f59phi-pack.html'">
-                            <div class="mt-2 text-base title clickable">
-                                <a href="trurail-simulations/metra-f59phi-pack.html" class="text-white hover:underline">Metra F59PHI Pack</a>
-                            </div>
-                            <div class="text-gray-400 author clickable">
-                                <a href="trurail-simulations.html" class="hover:underline">TruRail Simulations</a>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <img src="https://files.trainsimarchive.org/media/14a601_3dc0cb665169413bb897f03bb1cea489~mv2.png" alt="Ex-Conrail C40-8 Pack" class="thumbnail" onclick="window.location='cleartracks/ex-conrail-c40-8-pack.html'">
-                            <div class="mt-2 text-base title clickable">
-                                <a href="cleartracks/ex-conrail-c40-8-pack.html" class="text-white hover:underline">Ex-Conrail C40-8 Pack</a>
-                            </div>
-                            <div class="text-gray-400 author clickable">
-                                <a href="cleartracks.html" class="hover:underline">ClearTracks</a>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <img src="https://files.trainsimarchive.org/media/metia_1.png" alt="PS 4750 Hopper Pack 2" class="thumbnail" onclick="window.location='cleartracks/ps-4750-hopper-pack-2.html'">
-                            <div class="mt-2 text-base title clickable">
-                                <a href="cleartracks/ps-4750-hopper-pack-2.html" class="text-white hover:underline">PS 4750 Hopper Pack 2</a>
-                            </div>
-                            <div class="text-gray-400 author clickable">
-                                <a href="trurail-simulations.html" class="hover:underline">TruRail Simulations</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="card">
-                            <img src="https://files.trainsimarchive.org/media/14a601_528635a3c3c4498ab38a783cb5c53eab~mv2.jpg" alt="CSX 1776 'Veterans' ES44AH" class="thumbnail" onclick="window.location='cleartracks/csx-1776-veterans-es44ah.html'">
-                            <div class="mt-2 text-base title clickable">
-                                <a href="cleartracks/csx-1776-veterans-es44ah.html" class="text-white hover:underline">CSX 1776 'Veterans' ES44AH</a>
-                            </div>
-                            <div class="text-gray-400 author clickable">
-                                <a href="cleartracks.html" class="hover:underline">ClearTracks</a>
-                            </div>
-                        </div>
+                    <div class="grid grid-cols-3 gap-4" id="randomModsContainer" style="opacity: 0; transition: opacity 0.5s ease-in;">
+                        <!-- Random mods will be loaded here -->
                     </div>
                     <div class="stat-box">
                         <p class="font-bold text-base mb-2">Archive Data:</p>
-                        <p>We have archived 172 Mods as of 6/15/25</p>
+                        <p id="archiveStats" style="opacity: 0; transition: opacity 0.5s ease-in;">Loading archive statistics...</p>
                     </div>
                 </div>
             </section>
