@@ -1232,7 +1232,12 @@ async function loadRandomMods() {
     try {
         console.log('Fetching random mods...');
         const response = await fetch('https://api.trainsimarchive.org/api/random-mods?count=4');
-        console.log('Response:', response.status);
+        console.log('Response:', response.status, response.ok);
+        
+        if (!response.ok) {
+            throw new Error(`API returned ${response.status}`);
+        }
+        
         const data = await response.json();
         console.log('Data received:', data);
         
@@ -1304,13 +1309,23 @@ async function loadArchiveStats() {
     if (!statsEl) return;
     
     try {
+        console.log('Fetching archive stats...');
         const response = await fetch('https://api.trainsimarchive.org/api/random-mods?count=1');
+        console.log('Stats API response:', response.status, response.ok);
+        
+        if (!response.ok) {
+            throw new Error(`Stats API returned ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('Stats data:', data);
         
         if (data.total) {
             // Get server date from response headers or use current date
+            console.log('Fetching refresh history...');
             const lastRefreshResponse = await fetch('https://api.trainsimarchive.org/api/the/the/the/refresh-history');
             const refreshData = await lastRefreshResponse.json();
+            console.log('Refresh data:', refreshData);
             
             let dateStr = new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
             
