@@ -3,27 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Search Train Simulator mods - Find locomotives, rolling stock, reskins, and more from the Train Simulator Mod Archive.">
-    <meta name="keywords" content="train simulator, search, mods, locomotives, rolling stock">
+    <meta name="description" content="Visual and audible overhaul of the BNSF C44-9W DLC, focusing on the H1 scheme. ">
+    <meta name="keywords" content="train simulator, mods, archive, truRail, clearTracks, UTS creations, east coast simulations">
     <title>Search - Train Simulator Mod Archive</title>
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://trainsimarchive.org/search.html">
-    <meta property="og:title" content="Search - Train Simulator Mod Archive">
-    <meta property="og:description" content="Search through archived Train Simulator mods - locomotives, rolling stock, reskins, and more.">
-    <meta property="og:image" content="https://files.trainsimarchive.org/media/tsma-logo.png">
-    <meta property="og:site_name" content="Train Simulator Mod Archive">
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://trainsimarchive.org/search.html">
-    <meta property="twitter:title" content="Search - Train Simulator Mod Archive">
-    <meta property="twitter:description" content="Search through archived Train Simulator mods - locomotives, rolling stock, reskins, and more.">
-    <meta property="twitter:image" content="https://files.trainsimarchive.org/media/tsma-logo.png">
-    
-    <!-- Theme Color -->
-    <meta name="theme-color" content="#4f76d9">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://files.trainsimarchive.org/media/tsma-logo.png" as="image">
@@ -276,7 +258,7 @@
                 // Display results - add results as a new section
                 resultsContainer.innerHTML = `
                     <h2 class="category-title">Found ${data.totalResults} Result${data.totalResults === 1 ? '' : 's'}</h2>
-                    <div class="mods-grid">
+                    <div class="mods-grid search-results-grid">
                         ${data.results.map(mod => `
                             <div class="mod-card">
                                 <a href="${mod.url}" class="mod-card-link">
@@ -313,6 +295,27 @@
             if (desktopInput) desktopInput.value = query;
             if (mobileInput) mobileInput.value = query;
         }
+        
+        // Debug width measurements
+        setTimeout(() => {
+            const body = document.body;
+            const html = document.documentElement;
+            const mainWide = document.querySelector('.privacy-main-wide');
+            const privacyContainer = document.querySelector('.privacy-container');
+            const pageSection = document.querySelector('.contributor-page-section');
+            const resultsGrid = document.querySelector('.search-results-grid');
+            
+            console.log('=== WIDTH DEBUG ===');
+            console.log('window.innerWidth:', window.innerWidth);
+            console.log('body width:', body?.offsetWidth, 'computed:', getComputedStyle(body).width);
+            console.log('body display:', getComputedStyle(body).display);
+            console.log('html width:', html?.offsetWidth, 'computed:', getComputedStyle(html).width);
+            console.log('privacy-main-wide parent:', mainWide?.parentElement.tagName, mainWide?.parentElement.className);
+            console.log('privacy-main-wide width:', mainWide?.offsetWidth, 'max-width:', getComputedStyle(mainWide).maxWidth, 'flex:', getComputedStyle(mainWide).flex);
+            console.log('privacy-container width:', privacyContainer?.offsetWidth, 'computed:', getComputedStyle(privacyContainer).width);
+            console.log('contributor-page-section width:', pageSection?.offsetWidth, 'computed:', getComputedStyle(pageSection).width);
+            console.log('search-results-grid width:', resultsGrid?.offsetWidth, 'computed:', getComputedStyle(resultsGrid).width);
+        }, 1000);
     </script>
 </body>
 </html>
