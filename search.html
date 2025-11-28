@@ -229,11 +229,6 @@
                 const response = await fetch(`https://api.trainsimarchive.org/api/search?q=${encodeURIComponent(searchQuery)}&_=${timestamp}`);
                 const data = await response.json();
                 
-                console.log('Search API response:', data);
-                console.log('Query was:', searchQuery);
-                console.log('Results count:', data.totalResults);
-                console.log('Results array:', data.results);
-                
                 if (data.error) {
                     console.error('API error:', data.error);
                     resultsContainer.innerHTML = `<p class="search-error">Error: ${data.error}</p>`;
