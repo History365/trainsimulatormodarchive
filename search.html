@@ -125,8 +125,6 @@
             // Clear localStorage cache for old data
             localStorage.removeItem('searchCache');
             localStorage.removeItem('modsCache');
-            
-            console.log('Cleared old search cache data');
         } catch (e) {
             console.warn('Could not clear cache:', e);
         }
@@ -179,20 +177,8 @@
             try {
                 // Add cache-busting timestamp
                 const timestamp = new Date().getTime();
-                const response = await fetch(`https://api.trainsimarchive.org/api/random-mods?count=999&_=${timestamp}`, {
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    }
-                });
+                const response = await fetch(`https://api.trainsimarchive.org/api/random-mods?count=999&_=${timestamp}`);
                 const data = await response.json();
-                
-                if (!data.mods || data.mods.length === 0) return null;
-                
-                const queryLower = searchQuery.toLowerCase();
-                let closestMatch = null;
-                let smallestDistance = Infinity;
                 
                 data.mods.forEach(mod => {
                     const titleLower = mod.title.toLowerCase();
@@ -240,13 +226,7 @@
             try {
                 // Add cache-busting timestamp to force fresh API calls
                 const timestamp = new Date().getTime();
-                const response = await fetch(`https://api.trainsimarchive.org/api/search?q=${encodeURIComponent(searchQuery)}&_=${timestamp}`, {
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    }
-                });
+                const response = await fetch(`https://api.trainsimarchive.org/api/search?q=${encodeURIComponent(searchQuery)}&_=${timestamp}`);
                 const data = await response.json();
                 
                 console.log('Search API response:', data);
@@ -327,27 +307,6 @@
             if (desktopInput) desktopInput.value = query;
             if (mobileInput) mobileInput.value = query;
         }
-        
-        // Debug width measurements
-        setTimeout(() => {
-            const body = document.body;
-            const html = document.documentElement;
-            const mainWide = document.querySelector('.privacy-main-wide');
-            const privacyContainer = document.querySelector('.privacy-container');
-            const pageSection = document.querySelector('.contributor-page-section');
-            const resultsGrid = document.querySelector('.search-results-grid');
-            
-            console.log('=== WIDTH DEBUG ===');
-            console.log('window.innerWidth:', window.innerWidth);
-            console.log('body width:', body?.offsetWidth, 'computed:', getComputedStyle(body).width);
-            console.log('body display:', getComputedStyle(body).display);
-            console.log('html width:', html?.offsetWidth, 'computed:', getComputedStyle(html).width);
-            console.log('privacy-main-wide parent:', mainWide?.parentElement.tagName, mainWide?.parentElement.className);
-            console.log('privacy-main-wide width:', mainWide?.offsetWidth, 'max-width:', getComputedStyle(mainWide).maxWidth, 'flex:', getComputedStyle(mainWide).flex);
-            console.log('privacy-container width:', privacyContainer?.offsetWidth, 'computed:', getComputedStyle(privacyContainer).width);
-            console.log('contributor-page-section width:', pageSection?.offsetWidth, 'computed:', getComputedStyle(pageSection).width);
-            console.log('search-results-grid width:', resultsGrid?.offsetWidth, 'computed:', getComputedStyle(resultsGrid).width);
-        }, 1000);
     </script>
 </body>
 </html>

@@ -81,14 +81,14 @@
                 <p class="contributor-description">Browse the complete collection of TruRail Simulations content. Use the navigation below to jump to specific categories or scroll through all available mods.</p>
             </div>
             
-            <!-- Category Navigation -->
-            <div class="category-nav">
-                <a href="#bundles" class="category-nav-link">Bundles</a>
-                <a href="#enhancement-packs" class="category-nav-link">Enhancement Packs</a>
-                <a href="#horns-whistles" class="category-nav-link">Horns / Whistles</a>
-                <a href="#patches" class="category-nav-link">Patches</a>
-                <a href="#reskins" class="category-nav-link">Reskins</a>
-                <a href="#rolling-stock" class="category-nav-link">Rolling Stock</a>
+            <!-- Sticky Sidebar Navigation -->
+            <div class="sticky-sidebar-nav">
+                <a href="#bundles" class="sidebar-nav-link" data-target="bundles">Bundles</a>
+                <a href="#enhancement-packs" class="sidebar-nav-link" data-target="enhancement-packs">Enhancement Packs</a>
+                <a href="#horns-whistles" class="sidebar-nav-link" data-target="horns-whistles">Horns / Whistles</a>
+                <a href="#patches" class="sidebar-nav-link" data-target="patches">Patches</a>
+                <a href="#reskins" class="sidebar-nav-link" data-target="reskins">Reskins</a>
+                <a href="#rolling-stock" class="sidebar-nav-link" data-target="rolling-stock">Rolling Stock</a>
             </div>
             
             <!-- Bundles Section -->
@@ -570,12 +570,12 @@
                 <h2 class="category-title">Rolling Stock</h2>
                 <div class="mods-grid">
                     <div class="mod-card">
-                        <a href="#" class="mod-card-link">
-                            <div class="mod-card-image" style="background-image: url('https://files.trainsimarchive.org/media/placeholder.jpg');"></div>
+                        <a href="trurail-simulations/autoflood-iii-hopper.html" class="mod-card-link">
+                            <div class="mod-card-image" style="background-image: url('https://files.trainsimarchive.org/media/14a601_573daa1d3f5349d183788c389e73883d~mv2.jpg');"></div>
                         </a>
                         <div class="mod-card-content">
-                            <a href="#" class="mod-card-link">
-                                <h3 class="mod-card-title">Autoflood III Downloads</h3>
+                            <a href="trurail-simulations/autoflood-iii-hopper.html" class="mod-card-link">
+                                <h3 class="mod-card-title">Autoflood III Hoppers</h3>
                             </a>
                             <p class="mod-card-description">This download contains 11 variants of the Autoflood Hopper</p>
                         </div>
@@ -725,25 +725,5 @@
 
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
-    <script>
-        // Debug width measurements
-        setTimeout(() => {
-            const body = document.body;
-            const html = document.documentElement;
-            const mainWide = document.querySelector('.privacy-main-wide');
-            const privacyContainer = document.querySelector('.privacy-container');
-            const pageSection = document.querySelector('.contributor-page-section');
-            const modsGrid = document.querySelector('.mods-grid');
-            
-            console.log('=== TRURAIL WIDTH DEBUG ===');
-            console.log('window.innerWidth:', window.innerWidth);
-            console.log('body width:', body?.offsetWidth, 'computed:', getComputedStyle(body).width);
-            console.log('html width:', html?.offsetWidth, 'computed:', getComputedStyle(html).width);
-            console.log('privacy-main-wide width:', mainWide?.offsetWidth, 'max-width:', getComputedStyle(mainWide).maxWidth);
-            console.log('privacy-container width:', privacyContainer?.offsetWidth, 'computed:', getComputedStyle(privacyContainer).width);
-            console.log('contributor-page-section width:', pageSection?.offsetWidth, 'computed:', getComputedStyle(pageSection).width);
-            console.log('mods-grid width:', modsGrid?.offsetWidth, 'computed:', getComputedStyle(modsGrid).width);
-        }, 1000);
-    </script>
 </body>
 </html>

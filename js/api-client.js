@@ -1,4 +1,4 @@
-// TSMA API Client - Add to main.js or create separate file
+// TSMA API Client
 
 const TSMA_API_URL = 'https://api.trainsimarchive.org'; // Replace with your Worker URL
 

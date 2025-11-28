@@ -1,10 +1,7 @@
 /**
  * Train Simulator Mod Archive - Main JavaScript
- * Modern interactivity for the archive website
- * Last updated: October 24, 2025
+ * Last updated: November 27, 2025
  */
-
-console.log('main.js loaded');
 
 // Archive Statistics Counter Animation
 function animateValue(element, start, end, duration) {
@@ -95,7 +92,6 @@ function debounce(func, wait) {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded - main.js running');
     
     // Initialize tooltips and popovers
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -166,25 +162,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show cookie banner if needed
     const consent = getCookieConsent();
-    console.log('Cookie consent status:', consent);
     if (consent === null) {
-        console.log('No consent found, showing banner');
         showCookieBanner();
-    } else {
-        console.log('Consent already given:', consent);
     }
     
     // Initialize search
-    console.log('About to call initSearch()');
     try {
         initSearch();
-        console.log('initSearch() completed');
     } catch (error) {
         console.error('Error in initSearch():', error);
     }
     
+    // Initialize scroll buttons and sidebar navigation
+    initScrollButtons();
+    initSidebarNavigation();
+    initMobileSidebarToggle();
+    
+    // Trigger initial scroll check for buttons
+    setTimeout(() => {
+        window.dispatchEvent(new Event('scroll'));
+    }, 100);
+    
     // Load random mods on homepage
-    console.log('About to call loadRandomMods()');
     loadRandomMods();
     
     // Load archive statistics
@@ -398,7 +397,10 @@ function updateMainGalleryImage(index) {
 // Generate gallery dots
 function generateGalleryDots() {
     const dotsContainer = document.getElementById('galleryDots');
-    if (!dotsContainer || !galleryImages.length) return;
+    
+    if (!dotsContainer || !galleryImages.length) {
+        return;
+    }
     
     dotsContainer.innerHTML = '';
     galleryImages.forEach((img, index) => {
@@ -412,6 +414,7 @@ function generateGalleryDots() {
             autoPlayStopped = true;
             currentCycleIndex = index;
             updateMainGalleryImage(currentCycleIndex);
+            updateActiveDot(currentCycleIndex);
         };
         dotsContainer.appendChild(dot);
     });
@@ -449,6 +452,7 @@ function manualNavigateGallery(direction) {
     }
     
     updateMainGalleryImage(currentCycleIndex);
+    updateActiveDot(currentCycleIndex);
 }
 
 // Start main gallery auto-cycle
@@ -752,6 +756,8 @@ function initGallerySystem() {
         mainImg.addEventListener('load', function() {
             maintainGalleryAspectRatio();
         });
+    } else {
+        console.error('Main image element not found or no gallery images');
     }
     
     // Calculate and set fixed height based on tallest image
@@ -1073,21 +1079,18 @@ function getCookieConsent() {
     const cookieConsent = document.cookie.split('; ').find(row => row.startsWith('cookieConsent='));
     if (cookieConsent) {
         const value = cookieConsent.split('=')[1];
-        console.log('Found consent in cookie:', value);
         return value;
     }
     
     // Check sessionStorage
     const sessionConsent = sessionStorage.getItem('cookieConsent');
     if (sessionConsent) {
-        console.log('Found consent in sessionStorage:', sessionConsent);
         return sessionConsent;
     }
     
     // Then check localStorage
     const consent = localStorage.getItem('cookieConsent');
     const consentDate = localStorage.getItem('cookieConsentDate');
-    console.log('Checking localStorage - consent:', consent, 'date:', consentDate);
     
     if (!consent || !consentDate) return null;
     
@@ -1108,19 +1111,16 @@ function getCookieConsent() {
 function setCookieConsent(accepted) {
     const consentValue = accepted ? 'accepted' : 'denied';
     const dateValue = Date.now().toString();
-    console.log('Setting cookie consent:', consentValue, 'date:', dateValue);
     
     // Set actual browser cookie (expires in 90 days)
     const expiryDate = new Date();
     expiryDate.setTime(expiryDate.getTime() + (90 * 24 * 60 * 60 * 1000));
     document.cookie = `cookieConsent=${consentValue}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
-    console.log('Saved to cookie');
     
     // Store in localStorage
     try {
         localStorage.setItem('cookieConsent', consentValue);
         localStorage.setItem('cookieConsentDate', dateValue);
-        console.log('Saved to localStorage');
     } catch (e) {
         console.warn('localStorage not available:', e);
     }
@@ -1128,7 +1128,6 @@ function setCookieConsent(accepted) {
     // Always save to sessionStorage as fallback
     sessionStorage.setItem('cookieConsent', consentValue);
     sessionStorage.setItem('cookieConsentDate', dateValue);
-    console.log('Saved to sessionStorage');
 }
 
 function showCookieBanner() {
@@ -1224,12 +1223,9 @@ function showCookieBanner() {
 
 // Homepage: Load random featured mods
 async function loadRandomMods() {
-    console.log('loadRandomMods called');
     const container = document.getElementById('randomModsContainer');
-    console.log('Container:', container);
     
     if (!container) {
-        console.log('randomModsContainer not found');
         return;
     }
     
@@ -1238,24 +1234,19 @@ async function loadRandomMods() {
     const canUseStorage = consent === 'accepted' || consent === null;
     
     try {
-        console.log('Fetching random mods...');
         const response = await fetch('https://api.trainsimarchive.org/api/random-mods?count=4');
-        console.log('Response:', response.status, response.ok);
         
         if (!response.ok) {
             throw new Error(`API returned ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('Data received:', data);
         
         let mods = data.mods || data;
-        console.log('Mods array:', mods);
         
         // Get previously shown mods (only if consent given)
         if (canUseStorage) {
             const lastShown = JSON.parse(sessionStorage.getItem('lastShownMods') || '[]');
-            console.log('Last shown mods:', lastShown);
             
             // Filter out previously shown mods if possible
             const newMods = mods.filter(mod => !lastShown.includes(mod.id || mod.title));
@@ -1268,8 +1259,6 @@ async function loadRandomMods() {
             // Save current mods to session storage
             sessionStorage.setItem('lastShownMods', JSON.stringify(mods.map(m => m.id || m.title)));
         }
-        
-        console.log('First mod creator:', mods[0]?.creator);
         
         // Map creator slugs to display names
         const creatorNames = {
@@ -1298,7 +1287,6 @@ async function loadRandomMods() {
             </div>
         `;
         }).join('');
-        console.log('Mods rendered successfully');
         
         // Fade in the container
         setTimeout(() => {
@@ -1317,23 +1305,18 @@ async function loadArchiveStats() {
     if (!statsEl) return;
     
     try {
-        console.log('Fetching archive stats...');
         const response = await fetch('https://api.trainsimarchive.org/api/random-mods?count=1');
-        console.log('Stats API response:', response.status, response.ok);
         
         if (!response.ok) {
             throw new Error(`Stats API returned ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('Stats data:', data);
         
         if (data.total) {
             // Get server date from response headers or use current date
-            console.log('Fetching refresh history...');
             const lastRefreshResponse = await fetch('https://api.trainsimarchive.org/api/the/the/the/refresh-history');
             const refreshData = await lastRefreshResponse.json();
-            console.log('Refresh data:', refreshData);
             
             let dateStr = new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
             
@@ -1357,3 +1340,124 @@ async function loadArchiveStats() {
         statsEl.style.opacity = '1';
     }
 }
+
+// ============================================
+// SCROLL BUTTONS & SIDEBAR NAVIGATION
+// ============================================
+
+// Initialize scroll buttons (back to top / scroll to bottom)
+function initScrollButtons() {
+    // Check if button already exists
+    let backToTopBtn = document.getElementById('backToTop');
+    
+    // Create back to top button if it doesn't exist
+    if (!backToTopBtn) {
+        backToTopBtn = document.createElement('button');
+        backToTopBtn.id = 'backToTop';
+        backToTopBtn.className = 'back-to-top';
+        backToTopBtn.setAttribute('aria-label', 'Back to top');
+        backToTopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+        document.body.appendChild(backToTopBtn);
+    }
+    
+    function handleScroll() {
+        const scrollTop = window.scrollY;
+        
+        // Show back to top when scrolled down past 300px
+        if (scrollTop > 300) {
+            backToTopBtn.classList.add('visible');
+        } else {
+            backToTopBtn.classList.remove('visible');
+        }
+    }
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    // Trigger initial check
+    handleScroll();
+    
+    backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+}
+
+// Initialize sticky sidebar navigation
+function initSidebarNavigation() {
+    const sidebarLinks = document.querySelectorAll('.sidebar-nav-link');
+    const sections = document.querySelectorAll('.category-section');
+    
+    if (sidebarLinks.length === 0 || sections.length === 0) return;
+    
+    function highlightCurrentSection() {
+        let current = '';
+        const scrollPos = window.scrollY + 150;
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            
+            if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+                current = section.getAttribute('id');
+            }
+        });
+        
+        sidebarLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('data-target') === current) {
+                link.classList.add('active');
+            }
+        });
+    }
+    
+    window.addEventListener('scroll', highlightCurrentSection);
+    highlightCurrentSection(); // Run on load
+}
+
+// Initialize mobile sidebar toggle button
+function initMobileSidebarToggle() {
+    const sidebar = document.querySelector('.sticky-sidebar-nav');
+    
+    if (!sidebar) {
+        return;
+    }
+    
+    // Create toggle button
+    const toggleBtn = document.createElement('button');
+    toggleBtn.id = 'mobileSidebarToggle';
+    toggleBtn.className = 'mobile-sidebar-toggle';
+    toggleBtn.setAttribute('aria-label', 'Toggle navigation menu');
+    toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    document.body.appendChild(toggleBtn);
+    console.log('Toggle button created and appended');
+    
+    // Toggle sidebar visibility
+    toggleBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sidebar.classList.toggle('mobile-visible');
+        this.classList.toggle('active');
+        console.log('Toggle clicked, sidebar visible:', sidebar.classList.contains('mobile-visible'));
+    });
+    
+    // Close sidebar when clicking a link
+    const sidebarLinks = sidebar.querySelectorAll('.sidebar-nav-link');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-visible');
+            toggleBtn.classList.remove('active');
+            toggleBtn.querySelector('i').className = 'fas fa-bars';
+        });
+    });
+    
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target) && sidebar.classList.contains('mobile-visible')) {
+            sidebar.classList.remove('mobile-visible');
+            toggleBtn.classList.remove('active');
+        }
+    });
+}
+
+
