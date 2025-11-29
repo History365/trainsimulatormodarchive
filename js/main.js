@@ -751,7 +751,7 @@ function initGallerySystem() {
         return;
     }
     
-    // Hide only the images, not the gallery structure
+    // Hide both main image and thumbnails initially
     const mainImg = document.getElementById('mainDisplayImage');
     const galleryThumbs = document.querySelectorAll('.gallery-thumb img');
     
@@ -762,24 +762,10 @@ function initGallerySystem() {
         thumb.style.opacity = '0';
     });
     
-    // Preload all images before showing them
-    let loadedCount = 0;
-    const totalImages = galleryImages.length;
-    
-    galleryImages.forEach(imageSrc => {
-        const img = new Image();
-        img.onload = img.onerror = function() {
-            loadedCount++;
-            if (loadedCount === totalImages) {
-                // All images loaded, now show them
-                showGalleryImages();
-            }
-        };
-        img.src = imageSrc;
-    });
-    
-    function showGalleryImages() {
-        // Set main display image to first thumbnail image
+    // Preload main image first, then thumbnails
+    const mainImage = new Image();
+    mainImage.onload = function() {
+        // Main image loaded - show it first
         if (mainImg) {
             mainImg.src = galleryImages[0];
             mainImg.classList.add('loaded');
@@ -789,21 +775,17 @@ function initGallerySystem() {
                 maintainGalleryAspectRatio();
             });
             
-            // Fade in main image
+            // Fade in main image immediately
             requestAnimationFrame(() => {
-                mainImg.style.transition = 'opacity 0.3s ease';
+                mainImg.style.transition = 'opacity 0.4s ease';
                 mainImg.style.opacity = '1';
             });
-        }
-        
-        // Fade in all thumbnails
-        galleryThumbs.forEach((thumb, index) => {
+            
+            // After main image is visible, preload and show thumbnails
             setTimeout(() => {
-                thumb.style.transition = 'opacity 0.3s ease';
-                thumb.style.opacity = '1';
-                thumb.classList.add('loaded');
-            }, index * 30);
-        });
+                preloadThumbnails(galleryThumbs);
+            }, 200);
+        }
         
         // Calculate and set fixed height based on tallest image
         setGalleryFixedHeight();
@@ -820,6 +802,44 @@ function initGallerySystem() {
                 startMainGalleryAutoCycle();
             }, 500);
         }
+    };
+    
+    mainImage.onerror = function() {
+        // If main image fails, still show thumbnails
+        if (mainImg) {
+            mainImg.style.opacity = '1';
+        }
+        preloadThumbnails(galleryThumbs);
+    };
+    
+    // Start loading main image
+    mainImage.src = galleryImages[0];
+    
+    // Helper function to preload and show thumbnails
+    function preloadThumbnails(thumbs) {
+        let loadedCount = 0;
+        const totalThumbs = Math.min(galleryImages.length, thumbs.length);
+        
+        galleryImages.forEach((imageSrc, index) => {
+            if (index >= thumbs.length) return;
+            
+            const img = new Image();
+            img.onload = img.onerror = function() {
+                loadedCount++;
+                
+                // When all thumbnails are loaded, fade them all in at once
+                if (loadedCount === totalThumbs) {
+                    thumbs.forEach((thumb) => {
+                        if (thumb) {
+                            thumb.style.transition = 'opacity 0.3s ease';
+                            thumb.style.opacity = '1';
+                            thumb.classList.add('loaded');
+                        }
+                    });
+                }
+            };
+            img.src = imageSrc;
+        });
     }
     
     // Add resize listener to recalculate fixed height
