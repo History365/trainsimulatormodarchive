@@ -178,6 +178,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initSidebarNavigation();
     initMobileSidebarToggle();
     
+    // Generate dynamic footer
+    generateFooter();
+    
     // Trigger initial scroll check for buttons
     setTimeout(() => {
         window.dispatchEvent(new Event('scroll'));
@@ -587,18 +590,15 @@ function loadLightboxImage(index) {
     // Create new image to preload
     const newImg = new Image();
     newImg.onload = function() {
-        // Wait a bit for smooth transition
-        setTimeout(() => {
-            img.src = galleryImages[index];
-            counter.textContent = `${index + 1} / ${galleryImages.length}`;
-            
-            // Hide loader and fade in new image
-            setTimeout(() => {
-                loader.style.display = 'none';
-                img.style.opacity = '1';
-                isLoading = false;
-            }, 100);
-        }, 200);
+        img.src = galleryImages[index];
+        counter.textContent = `${index + 1} / ${galleryImages.length}`;
+        
+        // Hide loader and fade in new image immediately
+        requestAnimationFrame(() => {
+            loader.style.display = 'none';
+            img.style.opacity = '1';
+            isLoading = false;
+        });
     };
     newImg.src = galleryImages[index];
 }
@@ -747,21 +747,80 @@ function initGallerySystem() {
     // Build gallery array and setup fade-in
     galleryImages = buildGalleryArray();
     
-    // Set main display image to first thumbnail image
-    const mainImg = document.getElementById('mainDisplayImage');
-    if (mainImg && galleryImages.length > 0) {
-        mainImg.src = galleryImages[0];
-        
-        // Maintain aspect ratio on load
-        mainImg.addEventListener('load', function() {
-            maintainGalleryAspectRatio();
-        });
-    } else {
-        console.error('Main image element not found or no gallery images');
+    if (galleryImages.length === 0) {
+        return;
     }
     
-    // Calculate and set fixed height based on tallest image
-    setGalleryFixedHeight();
+    // Hide only the images, not the gallery structure
+    const mainImg = document.getElementById('mainDisplayImage');
+    const galleryThumbs = document.querySelectorAll('.gallery-thumb img');
+    
+    if (mainImg) {
+        mainImg.style.opacity = '0';
+    }
+    galleryThumbs.forEach(thumb => {
+        thumb.style.opacity = '0';
+    });
+    
+    // Preload all images before showing them
+    let loadedCount = 0;
+    const totalImages = galleryImages.length;
+    
+    galleryImages.forEach(imageSrc => {
+        const img = new Image();
+        img.onload = img.onerror = function() {
+            loadedCount++;
+            if (loadedCount === totalImages) {
+                // All images loaded, now show them
+                showGalleryImages();
+            }
+        };
+        img.src = imageSrc;
+    });
+    
+    function showGalleryImages() {
+        // Set main display image to first thumbnail image
+        if (mainImg) {
+            mainImg.src = galleryImages[0];
+            mainImg.classList.add('loaded');
+            
+            // Maintain aspect ratio on load
+            mainImg.addEventListener('load', function() {
+                maintainGalleryAspectRatio();
+            });
+            
+            // Fade in main image
+            requestAnimationFrame(() => {
+                mainImg.style.transition = 'opacity 0.3s ease';
+                mainImg.style.opacity = '1';
+            });
+        }
+        
+        // Fade in all thumbnails
+        galleryThumbs.forEach((thumb, index) => {
+            setTimeout(() => {
+                thumb.style.transition = 'opacity 0.3s ease';
+                thumb.style.opacity = '1';
+                thumb.classList.add('loaded');
+            }, index * 30);
+        });
+        
+        // Calculate and set fixed height based on tallest image
+        setGalleryFixedHeight();
+        
+        // Generate gallery dots
+        generateGalleryDots();
+        
+        // Set first thumbnail as active on page load
+        updateActiveThumbnail(0);
+        
+        // Only start auto-cycling if there's more than one image
+        if (galleryImages.length > 1) {
+            setTimeout(() => {
+                startMainGalleryAutoCycle();
+            }, 500);
+        }
+    }
     
     // Add resize listener to recalculate fixed height
     let resizeTimeout;
@@ -774,19 +833,6 @@ function initGallerySystem() {
     });
     
     setupImageFadeIn();
-    
-    // Generate gallery dots
-    generateGalleryDots();
-    
-    // Set first thumbnail as active on page load
-    updateActiveThumbnail(0);
-    
-    // Only start auto-cycling if there's more than one image
-    if (galleryImages.length > 1) {
-        setTimeout(() => {
-            startMainGalleryAutoCycle();
-        }, 1000);
-    }
     
     // Add click handler to main gallery image
     const mainGalleryDiv = document.querySelector('.mod-gallery-main');
@@ -1234,7 +1280,7 @@ async function loadRandomMods() {
     const canUseStorage = consent === 'accepted' || consent === null;
     
     try {
-        const response = await fetch('https://api.trainsimarchive.org/api/random-mods?count=4');
+        const response = await fetch('https://api.trainsimarchive.org/api/random-mods?count=10');
         
         if (!response.ok) {
             throw new Error(`API returned ${response.status}`);
@@ -1458,6 +1504,58 @@ function initMobileSidebarToggle() {
             toggleBtn.classList.remove('active');
         }
     });
+}
+
+// Generate dynamic footer
+function generateFooter() {
+    const footerContainer = document.getElementById('dynamicFooter');
+    
+    if (!footerContainer) {
+        return;
+    }
+    
+    // Check if footer already has content (for static footers)
+    const existingContent = footerContainer.querySelector('.footer-content');
+    if (existingContent) {
+        // Footer already has static content, show immediately
+        footerContainer.style.opacity = '1';
+        footerContainer.style.transform = 'translateY(0)';
+        return;
+    }
+    
+    // Determine if we're in a subdirectory to set correct paths
+    const currentPath = window.location.pathname.split('#')[0].split('?')[0];
+    const pathWithoutFile = currentPath.substring(0, currentPath.lastIndexOf('/'));
+    const folderName = pathWithoutFile.split('/').pop();
+    const isInSubdirectory = folderName && folderName !== 'trainsimulatormodarchive';
+    
+    // Set correct paths based on location
+    const termsPath = isInSubdirectory ? '../terms.html' : 'terms.html';
+    const privacyPath = isInSubdirectory ? '../privacy.html' : 'privacy.html';
+    const supportPath = isInSubdirectory ? '../support.html' : 'support.html';
+    
+    const footerHTML = `
+        <div class="footer-content">
+            <div class="footer-nav">
+                <a href="${termsPath}">Terms of Use</a>
+                <span class="separator">•</span>
+                <a href="${privacyPath}">Privacy Policy</a>
+                <span class="separator">•</span>
+                <a href="${supportPath}">Support Us</a>
+                <span class="separator">•</span>
+                <a href="https://www.facebook.com/groups/trainsimulatormodarchive" target="_blank" title="Facebook Group">
+                    <i class="fab fa-facebook"></i>
+                </a>
+            </div>
+            <p class="footer-copyright">&copy; 2023 - 2025 Train Simulator Mod Archive</p>
+        </div>
+    `;
+    
+    footerContainer.innerHTML = footerHTML;
+    
+    // Show footer immediately
+    footerContainer.style.opacity = '1';
+    footerContainer.style.transform = 'translateY(0)';
 }
 
 

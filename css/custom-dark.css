@@ -334,6 +334,15 @@ footer {
     color: var(--text-color);
 }
 
+#dynamicFooter {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    contain: layout style;
+}
+
 .footer-content {
     max-width: 1200px;
     margin: 0 auto;
@@ -1527,14 +1536,17 @@ body {
     border-radius: 10px;
     overflow: visible;
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     display: flex;
     flex-direction: column;
     position: relative;
+    transform: translate3d(0, 0, 0);
+    will-change: transform, box-shadow;
+    backface-visibility: hidden;
 }
 
 .mod-card:hover {
-    transform: translateY(-6px);
+    transform: translate3d(0, -6px, 0);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
     border-color: #4a4a4a;
     z-index: 10;
@@ -1556,6 +1568,8 @@ body {
     background-position: center;
     background-color: #1a1a1a;
     border-bottom: 1px solid #2a2a2a;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
 }
 
 .mod-card-content {
@@ -2200,22 +2214,20 @@ body {
     object-fit: cover;
     display: block;
     opacity: 1;
-    transition: opacity 0.5s cubic-bezier(0.4, 0.0, 0.2, 1), filter 0.3s ease-out;
-    will-change: opacity, filter;
-    filter: blur(0px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    filter: none;
 }
 
 .mod-gallery-main img.loading {
-    filter: blur(20px);
-    transform: scale(1.05);
+    opacity: 0.7;
 }
 
 .mod-gallery-main img.loaded {
     opacity: 1;
-}
-
-.mod-gallery-main img.loaded {
-    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
 }
 
 .mod-gallery-thumbs {
@@ -2230,8 +2242,9 @@ body {
     overflow: hidden;
     cursor: pointer;
     border: 2px solid #2a2a2a;
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    will-change: transform;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .gallery-thumb:hover,
