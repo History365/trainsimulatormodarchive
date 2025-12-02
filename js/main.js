@@ -437,15 +437,13 @@ function updateActiveDot(index) {
 
 // Manual navigation (stops auto-play)
 function manualNavigateGallery(direction) {
-    if (autoPlayStopped) {
-        // Just navigate if already stopped
-        currentCycleIndex += direction;
-    } else {
-        // Stop auto-play on first manual interaction
+    // Always stop auto-play on manual interaction
+    if (!autoPlayStopped) {
         stopMainGalleryAutoCycle();
         autoPlayStopped = true;
-        currentCycleIndex += direction;
     }
+    
+    currentCycleIndex += direction;
     
     // Loop around
     if (currentCycleIndex >= galleryImages.length) {
@@ -621,6 +619,7 @@ function openLightbox(index) {
     
     // Stop main gallery auto-cycle when lightbox opens
     stopMainGalleryAutoCycle();
+    autoPlayStopped = true;
     
     // Update active thumbnail
     updateActiveThumbnail(currentIndex);
@@ -693,8 +692,7 @@ function closeLightbox() {
                 control.style.opacity = '1';
             });
             
-            // Restart main gallery auto-cycle when lightbox closes
-            startMainGalleryAutoCycle();
+            // Don't restart auto-cycle - user manually interacted
         }, 300);
     }, 150);
 }
@@ -863,6 +861,34 @@ function initGallerySystem() {
                 openLightbox(currentCycleIndex);
             }
         });
+        
+        // Add touch/swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        mainGalleryDiv.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        
+        mainGalleryDiv.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+        
+        function handleSwipe() {
+            const swipeThreshold = 50; // minimum distance for swipe
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swiped left - go to next
+                    manualNavigateGallery(1);
+                } else {
+                    // Swiped right - go to previous
+                    manualNavigateGallery(-1);
+                }
+            }
+        }
     }
     
     // Keyboard controls
