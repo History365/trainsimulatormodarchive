@@ -198,14 +198,14 @@ a:hover {
 }
 
 .logo {
-    height: 63px;
+    height: 60px;
     width: auto;
     display: block;
     transition: height 0.2s ease;
 }
 
 .navbar-brand img {
-    height: 63px;
+    height: 60px;
     width: auto;
     display: block;
     transition: height 0.2s ease;
@@ -326,7 +326,7 @@ a:hover {
 footer {
     background-color: var(--darker-bg);
     text-align: center;
-    padding: 1.25rem 1rem;
+    padding: 0 1rem;
     margin-top: auto;
     font-family: 'Inter', sans-serif;
     border-top: 1px solid var(--border-color);
@@ -335,7 +335,7 @@ footer {
 }
 
 #dynamicFooter {
-    min-height: 120px;
+    min-height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -346,12 +346,13 @@ footer {
 .footer-content {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0.5rem 0;
 }
 
 .footer-copyright {
     font-size: 0.875rem;
     color: var(--text-color);
-    margin: 0.75rem 0 0 0;
+    margin: 0.5rem 0 0 0;
     font-family: 'Inter', sans-serif;
 }
 
@@ -1806,7 +1807,7 @@ body {
 .mod-exconrail-section {
     background-color: #1a1a1a;
     border-radius: 12px;
-    padding: 1.5rem 2.5rem 1.5rem 2.5rem;
+    padding: 1.5rem 2.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     margin: 0 auto;
     max-width: 100%;
@@ -3932,5 +3933,3 @@ body {
         font-size: 1rem;
     }
 }
-
-
