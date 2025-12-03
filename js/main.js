@@ -581,24 +581,40 @@ function loadLightboxImage(index) {
     // Update active thumbnail
     updateActiveThumbnail(index);
     
-    // Show loader and fade out current image
-    loader.style.display = 'flex';
+    // Fade out current image first
     img.style.opacity = '0';
     
-    // Create new image to preload
-    const newImg = new Image();
-    newImg.onload = function() {
-        img.src = galleryImages[index];
-        counter.textContent = `${index + 1} / ${galleryImages.length}`;
-        
-        // Hide loader and fade in new image immediately
+    // Wait for fade out before showing loader
+    setTimeout(() => {
+        loader.style.display = 'flex';
+        // Fade in loader
         requestAnimationFrame(() => {
-            loader.style.display = 'none';
-            img.style.opacity = '1';
-            isLoading = false;
+            loader.style.opacity = '1';
         });
-    };
-    newImg.src = galleryImages[index];
+        
+        // Create new image to preload
+        const newImg = new Image();
+        newImg.onload = function() {
+            // Wait a moment to ensure smooth transition
+            setTimeout(() => {
+                img.src = galleryImages[index];
+                counter.textContent = `${index + 1} / ${galleryImages.length}`;
+                
+                // Fade out loader
+                loader.style.opacity = '0';
+                
+                // Once loader is faded out, hide it and fade in image
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    requestAnimationFrame(() => {
+                        img.style.opacity = '1';
+                        isLoading = false;
+                    });
+                }, 200);
+            }, 100);
+        };
+        newImg.src = galleryImages[index];
+    }, 200);
 }
 
 // Open lightbox
