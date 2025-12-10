@@ -127,6 +127,11 @@
                 <button class="btn btn-primary w-100" onclick="loadModList()">Load Mods</button>
             </div>
             
+            <div class="mb-3">
+                <button class="btn btn-warning w-100" onclick="migrateFromKV()">Migrate from KV to D1</button>
+                <small class="text-muted">Run once to import your 22 mods</small>
+            </div>
+            
             <div id="modList" class="mb-4"></div>
             
             <hr class="my-4">
@@ -307,6 +312,44 @@
             } catch (error) {
                 console.error('Load error:', error);
                 showStatus('Failed to load mod: ' + error.message, 'error');
+            }
+        }
+        
+        async function migrateFromKV() {
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                showStatus('Please enter API key first', 'error');
+                return;
+            }
+            
+            if (!confirm('This will migrate all mods from KV to D1. Continue?')) {
+                return;
+            }
+            
+            try {
+                showStatus('Migrating... please wait', 'success');
+                
+                const response = await fetch(`${API_BASE}/api/admin/migrate`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-Key': apiKey
+                    },
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Migration failed: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                showStatus(`Migration complete! ${result.migrated} mods imported`, 'success');
+                
+                // Auto-reload the mod list
+                setTimeout(() => loadModList(), 1000);
+                
+            } catch (error) {
+                console.error('Migration error:', error);
+                showStatus('Migration failed: ' + error.message, 'error');
             }
         }
         
