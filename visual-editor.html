@@ -3,483 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Mod Editor - TSMA</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/custom-dark.css" rel="stylesheet">
+    <title>Visual Mod Editor - Train Simulator Mod Archive</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/custom-dark.css">
     <style>
-        body { margin: 0; overflow: hidden; }
-        .editor-layout {
-            display: grid;
-            grid-template-columns: 350px 1fr;
+        body {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
             height: 100vh;
+            overflow: hidden;
+        }
+        .editor-container {
+            display: flex;
+            height: 100vh;
+            padding-top: 70px;
         }
         .sidebar {
-            background: var(--darker-bg);
-            padding: 1.5rem;
+            width: 350px;
+            background: #242424;
+            border-right: 1px solid #333;
             overflow-y: auto;
-            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
         }
         .preview-pane {
-            background: var(--dark-bg);
+            flex: 1;
             overflow-y: auto;
-            position: relative;
+            padding: 2rem;
+            background: #1a1a1a;
         }
-        .preview-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
-        }
-        .form-group { margin-bottom: 1rem; }
-        .form-label { 
-            display: block; 
-            margin-bottom: 0.5rem; 
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: var(--text-color);
-        }
-        .form-control, .form-select {
-            width: 100%;
-            padding: 0.5rem;
-            background: var(--medium-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            border-radius: 6px;
-            font-size: 0.875rem;
-        }
-        textarea.form-control {
-            min-height: 100px;
-            font-family: monospace;
-            font-size: 0.8125rem;
-        }
-        .btn-save {
-            width: 100%;
-            padding: 0.75rem;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 0.5rem;
-        }
-        .btn-save:hover { opacity: 0.9; }
-        .btn-secondary { background: var(--medium-bg); }
-        .mod-list {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            margin-bottom: 1rem;
+        .mod-preview {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #242424;
+            border-radius: 8px;
+            padding: 2rem;
         }
         .mod-list-item {
             padding: 0.75rem;
-            border-bottom: 1px solid var(--border-color);
+            background: #2a2a2a;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
             cursor: pointer;
             transition: background 0.2s;
         }
         .mod-list-item:hover {
-            background: var(--medium-bg);
+            background: #333;
         }
         .mod-list-item.active {
-            background: var(--primary-color);
-        }
-        .mod-list-item small {
-            display: block;
-            color: var(--muted-text);
-            margin-top: 0.25rem;
-        }
-        .top-bar {
-            padding: 0.75rem 1.5rem;
-            background: var(--darker-bg);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .api-key-input {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        .api-key-input input {
-            width: 300px;
-            padding: 0.5rem;
-            background: var(--medium-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            border-radius: 6px;
-        }
-        .status { 
-            padding: 0.5rem 1rem; 
-            border-radius: 6px; 
-            margin-bottom: 1rem;
-            display: none;
-        }
-        .status.success { background: #10b981; display: block; }
-        .status.error { background: #ef4444; display: block; }
-        .editable-preview {
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
+            background: #0d6efd;
         }
         [contenteditable="true"] {
             outline: 2px dashed transparent;
             transition: outline 0.2s;
+            padding: 0.25rem;
+            border-radius: 4px;
+        }
+        [contenteditable="true"]:hover {
+            outline-color: #0d6efd50;
+            background: #2a2a2a50;
         }
         [contenteditable="true"]:focus {
-            outline: 2px dashed var(--primary-color);
-            outline-offset: 4px;
+            outline-color: #0d6efd;
+            background: #2a2a2a;
         }
-        .edit-hint {
+        .status-message {
             position: fixed;
-            top: 10px;
-            right: 10px;
-            background: var(--primary-color);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
+            top: 90px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
             z-index: 1000;
+            display: none;
+        }
+        .status-message.success {
+            background: #198754;
+            color: white;
+        }
+        .status-message.error {
+            background: #dc3545;
+            color: white;
+        }
+        .form-label {
+            color: #aaa;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        .form-control, .form-select {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+        }
+        .form-control:focus, .form-select:focus {
+            background: #2a2a2a;
+            border-color: #0d6efd;
+            color: #e0e0e0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        .btn-primary {
+            background: #0d6efd;
+            border: none;
+        }
+        .btn-primary:hover {
+            background: #0b5ed7;
         }
     </style>
 </head>
 <body>
-    <div class="top-bar">
-        <h3 style="margin: 0;">Visual Mod Editor</h3>
-        <div class="api-key-input">
-            <input type="password" id="apiKey" placeholder="API Key">
-            <button class="btn btn-sm btn-secondary" onclick="saveApiKey()">Save Key</button>
-        </div>
-    </div>
+    <div class="status-message" id="statusMessage"></div>
     
-    <div class="editor-layout">
-        <!-- Left Sidebar -->
+    <div class="editor-container">
         <div class="sidebar">
-            <div class="status" id="status"></div>
+            <h5 class="mb-3">Visual Mod Editor</h5>
             
-            <button class="btn-save btn-secondary" onclick="loadModList()">Load Mods</button>
-            
-            <div class="mod-list" id="modList">
-                <div style="padding: 1rem; text-align: center; color: var(--muted-text);">
-                    Click "Load Mods" to see all mods
-                </div>
+            <div class="mb-3">
+                <label class="form-label">Admin API Key</label>
+                <input type="password" class="form-control" id="apiKey" placeholder="Enter API key">
+                <button class="btn btn-primary btn-sm mt-2 w-100" onclick="saveApiKey()">Save Key</button>
             </div>
             
-            <hr style="border-color: var(--border-color); margin: 1.5rem 0;">
+            <div class="mb-3">
+                <button class="btn btn-primary w-100" onclick="loadModList()">Load Mods</button>
+            </div>
             
-            <div id="editForm" style="display: none;">
-                <h4>Edit Mod</h4>
+            <div id="modList" class="mb-4"></div>
+            
+            <hr class="my-4">
+            
+            <h6 class="mb-3">Edit Form</h6>
+            <form id="editForm">
+                <input type="hidden" id="modId">
                 
-                <div class="form-group">
+                <div class="mb-3">
                     <label class="form-label">Title</label>
-                    <input type="text" id="title" class="form-control">
+                    <input type="text" class="form-control" id="formTitle">
                 </div>
                 
-                <div class="form-group">
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" id="formDescription" rows="3"></textarea>
+                </div>
+                
+                <div class="mb-3">
                     <label class="form-label">Creator</label>
-                    <select id="creator_id" class="form-select">
-                        <option value="trurail">TruRail Simulations</option>
-                        <option value="cleartracks">ClearTracks</option>
-                        <option value="uts">UTS Creations</option>
-                        <option value="eastcoast">East Coast Simulations</option>
-                        <option value="virtualrail">Virtual Rail Creations</option>
+                    <select class="form-select" id="formCreator">
+                        <option value="1">TruRail Simulations</option>
+                        <option value="2">ClearTracks Productions</option>
+                        <option value="3">UTS Creations</option>
+                        <option value="4">East Coast Simulations</option>
+                        <option value="5">VirtualRail Studios</option>
                     </select>
                 </div>
                 
-                <div class="form-group">
+                <div class="mb-3">
                     <label class="form-label">Category</label>
-                    <select id="category_id" class="form-select">
-                        <option value="bundles">Bundles</option>
-                        <option value="enhancement-packs">Enhancement Packs</option>
-                        <option value="reskins">Reskins</option>
-                        <option value="rolling-stock">Rolling Stock</option>
-                        <option value="locomotives">Locomotives</option>
-                        <option value="horns-whistles">Horns / Whistles</option>
-                        <option value="patches">Patches</option>
+                    <select class="form-select" id="formCategory">
+                        <option value="1">Bundles</option>
+                        <option value="2">Enhancement Packs</option>
+                        <option value="3">Reskins</option>
+                        <option value="4">Rolling Stock</option>
+                        <option value="5">Locomotives</option>
+                        <option value="6">Horns & Whistles</option>
+                        <option value="7">Patches</option>
+                        <option value="8">Routes</option>
+                        <option value="9">Audio</option>
+                        <option value="10">Fixes</option>
                     </select>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-label">Image URL</label>
-                    <input type="url" id="image_url" class="form-control">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Download URL</label>
-                    <input type="url" id="download_url" class="form-control">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">File Size</label>
-                    <input type="text" id="file_size" class="form-control" placeholder="10 MB">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Short Description</label>
-                    <textarea id="description" class="form-control" rows="3"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Full Content (HTML)</label>
-                    <textarea id="content" class="form-control" rows="6"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Tags (comma separated)</label>
-                    <input type="text" id="tags" class="form-control" placeholder="locomotive, freight">
-                </div>
-                
-                <button class="btn-save" onclick="saveChanges()">Save Changes</button>
-                <button class="btn-save btn-secondary" onclick="updatePreview()">Preview Changes</button>
-            </div>
+                <button type="button" class="btn btn-primary w-100" onclick="saveChanges()">Save Changes</button>
+            </form>
         </div>
         
-        <!-- Right Preview -->
-        <div class="preview-pane">
-            <div class="edit-hint" id="editHint" style="display: none;">
-                Click on text to edit directly!
-            </div>
-            <div class="editable-preview" id="preview">
-                <div style="padding: 4rem; text-align: center; color: var(--muted-text);">
-                    <h2>Select a mod to edit</h2>
-                    <p>Choose a mod from the list on the left to start editing</p>
+        <div class="preview-pane" id="previewPane">
+            <div class="mod-preview">
+                <h2 contenteditable="true" id="previewTitle" data-field="title">Click a mod to edit</h2>
+                <p contenteditable="true" id="previewDescription" data-field="description" class="text-muted">Select a mod from the sidebar to start editing</p>
+                
+                <div class="mt-4">
+                    <h5>Instructions</h5>
+                    <ul>
+                        <li>Enter your API key and click "Save Key"</li>
+                        <li>Click "Load Mods" to see all mods</li>
+                        <li>Click any mod in the list to load it</li>
+                        <li>Click on the title or description to edit directly</li>
+                        <li>Use the form on the left for more fields</li>
+                        <li>Click "Save Changes" when done</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
     
     <script>
-        const API_URL = 'https://api.trainsimarchive.org';
+        const API_BASE = 'https://api.trainsimarchive.org';
         let currentMod = null;
-        let allMods = [];
-        
-        function getHeaders() {
-            return {
-                'Content-Type': 'application/json',
-                'X-API-Key': localStorage.getItem('adminApiKey') || ''
-            };
-        }
         
         function saveApiKey() {
-            const key = document.getElementById('apiKey').value;
-            localStorage.setItem('adminApiKey', key);
-            showStatus('API Key saved!', 'success');
+            const key = document.getElementById('apiKey').value.trim();
+            if (key) {
+                localStorage.setItem('adminApiKey', key);
+                showStatus('API key saved', 'success');
+            } else {
+                showStatus('Please enter an API key', 'error');
+            }
         }
         
-        // Load saved API key
-        window.onload = () => {
-            const saved = localStorage.getItem('adminApiKey');
-            if (saved) document.getElementById('apiKey').value = saved;
-        };
+        function getApiKey() {
+            const key = localStorage.getItem('adminApiKey') || document.getElementById('apiKey').value.trim();
+            if (key) {
+                document.getElementById('apiKey').value = key;
+            }
+            return key;
+        }
         
         async function loadModList() {
-            try {
-                showStatus('Loading mods...', 'success');
-                const response = await fetch(`${API_URL}/api/admin/mods`, {
-                    method: 'GET',
-                    headers: getHeaders(),
-                    mode: 'cors'
-                if (result.success) {
-                    allMods = result.mods;
-                    const list = document.getElementById('modList');
-                    list.innerHTML = result.mods.map(mod => `
-                        <div class="mod-list-item" onclick="loadMod('${mod.id}')">
-                            <strong>${mod.title}</strong>
-                            <small>${mod.creator_name} - ${mod.category_name}</small>
-                        </div>
-                    `).join('');
-                    showStatus('Loaded ' + result.mods.length + ' mods', 'success');
-                } else {
-                    showStatus('Error loading mods: ' + (result.error || 'Unknown error'), 'error');
-                }       <div class="mod-list-item" onclick="loadMod('${mod.id}')">
-                            <strong>${mod.title}</strong>
-                            <small>${mod.creator_name} - ${mod.category_name}</small>
-                        </div>
-                    `).join('');
-                    showStatus('Loaded ' + result.mods.length + ' mods', 'success');
-                } else {
-                    showStatus('Error loading mods: ' + result.error, 'error');
-                }
-            } catch (error) {
-                showStatus('Error: ' + error.message, 'error');
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                showStatus('Please enter API key first', 'error');
+                return;
             }
-        }
-        async function loadMod(modId) {
-            try {
-                currentMod = allMods.find(m => m.id === modId);
-                if (currentMod) {
-                    populateForm(currentMod);
-                    renderPreview(currentMod);
-                    document.getElementById('editForm').style.display = 'block';
-                    document.getElementById('editHint').style.display = 'block';
-                    
-                    // Highlight active mod
-                    document.querySelectorAll('.mod-list-item').forEach(item => {
-                        item.classList.remove('active');
-                    });
-                    event.target.closest('.mod-list-item').classList.add('active');
-                    
-                    showStatus('Loaded: ' + currentMod.title, 'success');
-                }
-            } catch (error) {
-                showStatus('Error loading mod: ' + error.message, 'error');
-            }
-        }   }
-        }
-        
-        function populateForm(mod) {
-            document.getElementById('title').value = mod.title || '';
-            document.getElementById('creator_id').value = mod.creator_id || '';
-            document.getElementById('category_id').value = mod.category_id || '';
-            document.getElementById('image_url').value = mod.image_url || '';
-            document.getElementById('download_url').value = mod.download_url || '';
-            document.getElementById('file_size').value = mod.file_size || '';
-            document.getElementById('description').value = mod.description || '';
-            document.getElementById('content').value = mod.content || '';
-            document.getElementById('tags').value = mod.tags ? JSON.parse(mod.tags).join(', ') : '';
-        }
-        
-        function renderPreview(mod) {
-            const tags = mod.tags ? JSON.parse(mod.tags) : [];
-            
-            document.getElementById('preview').innerHTML = `
-                <div style="max-width: 900px; margin: 0 auto; padding: 2rem; background: var(--darker-bg); border-radius: 12px;">
-                    <h1 contenteditable="true" id="preview-title" style="margin-bottom: 1rem;">${mod.title}</h1>
-                    <p style="color: var(--muted-text); margin-bottom: 2rem;">
-                        By <strong>${mod.creator_name}</strong> | ${mod.category_name}
-                    </p>
-                    
-                    ${mod.image_url ? `
-                        <img src="${mod.image_url}" alt="${mod.title}" 
-                             style="width: 100%; max-width: 600px; border-radius: 8px; margin-bottom: 2rem;">
-                        <div style="margin-bottom: 1rem;">
-                            <input type="text" id="preview-image" value="${mod.image_url}" 
-                                   style="width: 100%; padding: 0.5rem; background: var(--medium-bg); 
-                                          border: 1px solid var(--border-color); color: var(--text-color); 
-                                          border-radius: 6px;" placeholder="Image URL">
-                        </div>
-                    ` : ''}
-                    
-                    <div style="background: var(--medium-bg); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                        <h3 style="margin-bottom: 1rem;">Description</h3>
-                        <div contenteditable="true" id="preview-description">${mod.description || ''}</div>
-                    </div>
-                    
-                    <div style="background: var(--medium-bg); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                        <h3 style="margin-bottom: 1rem;">Full Content</h3>
-                        <div contenteditable="true" id="preview-content">${mod.content || '<p>Click to add content...</p>'}</div>
-                    </div>
-                    
-                    <div style="background: var(--medium-bg); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                        <p><strong>File Size:</strong> <span contenteditable="true" id="preview-filesize">${mod.file_size || 'N/A'}</span></p>
-                        <p><strong>Download URL:</strong></p>
-                        <input type="text" id="preview-download" value="${mod.download_url || ''}" 
-                               style="width: 100%; padding: 0.5rem; background: var(--dark-bg); 
-                                      border: 1px solid var(--border-color); color: var(--text-color); 
-                                      border-radius: 6px;">
-                    </div>
-                    
-                    ${tags.length > 0 ? `
-                        <div style="background: var(--medium-bg); padding: 1.5rem; border-radius: 8px;">
-                            <h4>Tags</h4>
-                            <div contenteditable="true" id="preview-tags">${tags.join(', ')}</div>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-            
-            // Add change listeners to sync back to form
-            syncPreviewToForm();
-        }
-        
-        function syncPreviewToForm() {
-            const syncElement = (previewId, formId) => {
-                const el = document.getElementById(previewId);
-                if (el) {
-                    el.addEventListener('blur', () => {
-                        document.getElementById(formId).value = el.textContent || el.value;
-                    });
-                }
-            };
-            
-            syncElement('preview-title', 'title');
-            syncElement('preview-description', 'description');
-            syncElement('preview-content', 'content');
-            syncElement('preview-filesize', 'file_size');
-            syncElement('preview-image', 'image_url');
-            syncElement('preview-download', 'download_url');
-            syncElement('preview-tags', 'tags');
-        }
-        
-        function updatePreview() {
-            if (!currentMod) return;
-            
-            // Get values from form
-            const updatedMod = {
-                ...currentMod,
-                title: document.getElementById('title').value,
-                description: document.getElementById('description').value,
-                content: document.getElementById('content').value,
-                image_url: document.getElementById('image_url').value,
-                download_url: document.getElementById('download_url').value,
-                file_size: document.getElementById('file_size').value,
-                tags: JSON.stringify(document.getElementById('tags').value.split(',').map(t => t.trim()))
-            };
-            
-            renderPreview(updatedMod);
-            showStatus('Preview updated!', 'success');
-        }
-        
-        async function saveChanges() {
-            if (!currentMod) return;
-            
-            // Collect data from form
-            const data = {
-                title: document.getElementById('title').value,
-                creator_id: document.getElementById('creator_id').value,
-                category_id: document.getElementById('category_id').value,
-                description: document.getElementById('description').value,
-                content: document.getElementById('content').value,
-                image_url: document.getElementById('image_url').value,
-                download_url: document.getElementById('download_url').value,
-                file_size: document.getElementById('file_size').value,
-                tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t)
-            };
             
             try {
-                const response = await fetch(`${API_URL}/api/admin/mods/${currentMod.id}`, {
-                    method: 'PUT',
-                    headers: getHeaders(),
-            try {
-                showStatus('Saving...', 'success');
-                const response = await fetch(`${API_URL}/api/admin/mods/${currentMod.id}`, {
-                    method: 'PUT',
-                    headers: getHeaders(),
-                    body: JSON.stringify(data),
+                const response = await fetch(`${API_BASE}/api/admin/mods`, {
+                    headers: {
+                        'X-API-Key': apiKey
+                    },
                     mode: 'cors'
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(`Failed to load mods: ${response.status}`);
                 }
                 
-                const result = await response.json();t
-                } else {
-                    showStatus('Error: ' + result.error, 'error');
-                }
+                const data = await response.json();
+                const mods = data.mods || [];
+                
+                const modListHtml = mods.map(mod => `
+                    <div class="mod-list-item" onclick="loadMod(${mod.id})">
+                        <strong>${mod.title}</strong>
+                        <br>
+                        <small class="text-muted">${mod.creator_name || 'Unknown'}</small>
+                    </div>
+                `).join('');
+                
+                document.getElementById('modList').innerHTML = modListHtml || '<p class="text-muted">No mods found</p>';
+                showStatus(`Loaded ${mods.length} mods`, 'success');
+                
             } catch (error) {
-                showStatus('Error: ' + error.message, 'error');
+                console.error('Load error:', error);
+                showStatus('Failed to load mods: ' + error.message, 'error');
             }
         }
         
+        async function loadMod(modId) {
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                showStatus('Please enter API key first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/mods`, {
+                    headers: {
+                        'X-API-Key': apiKey
+                    },
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load mod: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const mod = data.mods.find(m => m.id === modId);
+                
+                if (!mod) {
+                    throw new Error('Mod not found');
+                }
+                
+                currentMod = mod;
+                
+                // Update preview
+                document.getElementById('previewTitle').textContent = mod.title;
+                document.getElementById('previewDescription').textContent = mod.description;
+                
+                // Update form
+                document.getElementById('modId').value = mod.id;
+                document.getElementById('formTitle').value = mod.title;
+                document.getElementById('formDescription').value = mod.description;
+                document.getElementById('formCreator').value = mod.creator_id;
+                document.getElementById('formCategory').value = mod.category_id;
+                
+                // Highlight active mod
+                document.querySelectorAll('.mod-list-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                event.target.closest('.mod-list-item')?.classList.add('active');
+                
+                showStatus('Mod loaded', 'success');
+                
+            } catch (error) {
+                console.error('Load error:', error);
+                showStatus('Failed to load mod: ' + error.message, 'error');
+            }
+        }
+        
+        async function saveChanges() {
+            const apiKey = getApiKey();
+            const modId = document.getElementById('modId').value;
+            
+            if (!apiKey) {
+                showStatus('Please enter API key first', 'error');
+                return;
+            }
+            
+            if (!modId) {
+                showStatus('No mod selected', 'error');
+                return;
+            }
+            
+            const updates = {
+                title: document.getElementById('formTitle').value,
+                description: document.getElementById('formDescription').value,
+                creator_id: parseInt(document.getElementById('formCreator').value),
+                category_id: parseInt(document.getElementById('formCategory').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/mods/${modId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': apiKey
+                    },
+                    body: JSON.stringify(updates),
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to save: ${response.status}`);
+                }
+                
+                // Update preview to match form
+                document.getElementById('previewTitle').textContent = updates.title;
+                document.getElementById('previewDescription').textContent = updates.description;
+                
+                showStatus('Changes saved successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Save error:', error);
+                showStatus('Failed to save changes: ' + error.message, 'error');
+            }
+        }
+        
+        function updatePreview() {
+            // Sync preview edits back to form
+            const title = document.getElementById('previewTitle').textContent;
+            const description = document.getElementById('previewDescription').textContent;
+            
+            document.getElementById('formTitle').value = title;
+            document.getElementById('formDescription').value = description;
+        }
+        
         function showStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = 'status ' + type;
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            statusEl.style.display = 'block';
+            
             setTimeout(() => {
-                status.style.display = 'none';
+                statusEl.style.display = 'none';
             }, 3000);
         }
+        
+        // Sync preview edits back to form on blur
+        document.getElementById('previewTitle')?.addEventListener('blur', updatePreview);
+        document.getElementById('previewDescription')?.addEventListener('blur', updatePreview);
+        
+        // Load API key on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            getApiKey();
+        });
     </script>
 </body>
 </html>
