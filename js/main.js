@@ -1352,6 +1352,9 @@ async function loadRandomMods() {
         
         let mods = data.mods || data;
         
+        // Limit to 4 mods
+        mods = mods.slice(0, 4);
+        
         // Get previously shown mods (only if consent given)
         if (canUseStorage) {
             const lastShown = JSON.parse(sessionStorage.getItem('lastShownMods') || '[]');
@@ -1361,7 +1364,7 @@ async function loadRandomMods() {
             
             // If we have enough new mods, use them; otherwise use all mods
             if (newMods.length >= 4) {
-                mods = newMods.slice(0, 4);
+                mods = newMods;
             }
             
             // Save current mods to session storage
