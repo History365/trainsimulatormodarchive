@@ -1,6 +1,6 @@
 /**
  * Train Simulator Mod Archive - Main JavaScript
- * Last updated: November 27, 2025
+ * Last updated: December 14, 2025
  */
 
 // Archive Statistics Counter Animation
@@ -1622,5 +1622,4 @@ function generateFooter() {
     footerContainer.style.opacity = '1';
     footerContainer.style.transform = 'translateY(0)';
 }
-
 
