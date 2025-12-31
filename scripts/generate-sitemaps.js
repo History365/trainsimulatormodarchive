@@ -2,9 +2,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 const BASE_URL = 'https://www.trainsimarchive.org';
+const IMAGE_BASE_URL = 'https://files.trainsimarchive.org/media';
 
 // Get all HTML files from mod directories
 function getModPages() {
@@ -18,8 +18,10 @@ function getModPages() {
   
   directories.forEach(dir => {
     const dirPath = path.join(__dirname, '..', dir);
+    console.log(`Checking directory: ${dirPath}`);
     if (fs.existsSync(dirPath)) {
       const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.html') && f !== 'index.html');
+      console.log(`Found ${files.length} HTML files in ${dir}`);
       files.forEach(file => {
         const slug = file.replace('.html', '');
         mods.push({
@@ -31,6 +33,7 @@ function getModPages() {
     }
   });
   
+  console.log(`Total mods found: ${mods.length}`);
   return mods;
 }
 
@@ -39,19 +42,22 @@ function getImages() {
   const mediaPath = path.join(__dirname, '..', 'media');
   const images = [];
   
+  console.log(`Checking media directory: ${mediaPath}`);
   if (fs.existsSync(mediaPath)) {
     const files = fs.readdirSync(mediaPath);
+    console.log(`Found ${files.length} files in media folder`);
     files.forEach(file => {
       const ext = path.extname(file).toLowerCase();
       if (['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext)) {
         images.push({
-          url: `${BASE_URL}/media/${file}`,
+          url: `${IMAGE_BASE_URL}/${file}`,
           title: file.replace(/~.*$/, '').replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')
         });
       }
     });
   }
   
+  console.log(`Total images found: ${images.length}`);
   return images;
 }
 
