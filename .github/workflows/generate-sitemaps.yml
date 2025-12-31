@@ -25,13 +25,29 @@ jobs:
       - name: Generate sitemaps
         run: node scripts/generate-sitemaps.js
       
-      - name: Check git status
-        run: git status
+      - name: Show generated files
+        run: |
+          echo "=== sitemap.xml ==="
+          head -20 sitemap.xml
+          echo ""
+          echo "=== image-sitemap.xml ==="
+          head -20 image-sitemap.xml
       
-      - name: Commit and push
+      - name: Check if files exist
+        run: |
+          ls -lh sitemap.xml image-sitemap.xml
+      
+      - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add sitemap.xml image-sitemap.xml
-          git commit -m "chore: auto-generate sitemaps" || true
-          git push
+      
+      - name: Add and commit
+        run: |
+          git add -f sitemap.xml image-sitemap.xml
+          git status
+          git diff --cached --stat
+          git commit -m "chore: auto-generate sitemaps" || echo "No changes to commit"
+      
+      - name: Push changes
+        run: git push || echo "Nothing to push"
