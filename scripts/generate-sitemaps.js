@@ -98,23 +98,29 @@ function generatePageSitemap() {
 // Generate image sitemap
 function generateImageSitemap() {
   const images = getImages();
-  const pages = [
-    { url: BASE_URL, images: images },
-    { url: `${BASE_URL}/trurail-simulations`, images: images.slice(0, 2) },
-    { url: `${BASE_URL}/uts-creations`, images: images.slice(1, 3) },
-    { url: `${BASE_URL}/cleartracks`, images: images.slice(2, 4) }
-  ];
+  
+  if (images.length === 0) {
+    console.log('⚠ Warning: No images found for image sitemap');
+  }
   
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n';
   xml += '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n\n';
   
-  pages.forEach(page => {
-    if (page.images.length > 0) {
+  // Main pages with all images
+  const mainPages = [
+    BASE_URL,
+    `${BASE_URL}/trurail-simulations`,
+    `${BASE_URL}/uts-creations`,
+    `${BASE_URL}/cleartracks`
+  ];
+  
+  mainPages.forEach(pageUrl => {
+    if (images.length > 0) {
       xml += '  <url>\n';
-      xml += `    <loc>${page.url}</loc>\n`;
+      xml += `    <loc>${pageUrl}</loc>\n`;
       
-      page.images.forEach(img => {
+      images.forEach(img => {
         xml += '    <image:image>\n';
         xml += `      <image:loc>${img.url}</image:loc>\n`;
         xml += `      <image:title>${img.title}</image:title>\n`;
