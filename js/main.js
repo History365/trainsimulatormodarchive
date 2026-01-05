@@ -188,6 +188,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load random mods on homepage
     loadRandomMods();
+    // Load top downloads
+    loadTopDownloads();
     
     // Load archive statistics
     loadArchiveStats();
@@ -1410,6 +1412,118 @@ async function loadRandomMods() {
     }
 }
 
+// Homepage: Load top 5 most downloaded files
+async function loadTopDownloads() {
+    const container = document.getElementById('topDownloadsContainer');
+    if (!container) return;
+
+    const cacheKey = 'topDownloads_v3';
+
+    // Try cache first (1 hour)
+    try {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (
+                parsed &&
+                Array.isArray(parsed.items) &&
+                parsed.items.length > 0 &&
+                Date.now() - parsed.ts < 1000 * 60 * 60
+            ) {
+                renderTopDownloads(
+                    parsed.items,
+                    container,
+                    parsed.totalDownloads
+                );
+                return;
+            }
+            sessionStorage.removeItem(cacheKey);
+        }
+    } catch (_) {}
+
+    try {
+        const resp = await fetch(
+            'https://api.trainsimarchive.org/api/stats/top-downloads'
+        );
+        if (!resp.ok) throw new Error('API request failed');
+
+        const data = await resp.json();
+
+        // 🔑 Normalize API response (handles all known shapes)
+        const totalDownloads = Number(
+            data.totalDownloads ??
+            data.total_downloads ??
+            data.total ??
+            0
+        );
+
+        const rawList =
+            data.top ??
+            data.topDownloads ??
+            data.downloads ??
+            data.data ??
+            [];
+
+        const items = Array.isArray(rawList)
+            ? rawList.slice(0, 5).map(entry => ({
+                filename: entry.filename || entry.file || 'Unknown file',
+                downloads: Number(
+                    entry.downloads ??
+                    entry.count ??
+                    entry.download_count ??
+                    0
+                )
+            }))
+            : [];
+
+        // Save cache
+        try {
+            sessionStorage.setItem(
+                cacheKey,
+                JSON.stringify({
+                    ts: Date.now(),
+                    totalDownloads,
+                    items
+                })
+            );
+        } catch (_) {}
+
+        renderTopDownloads(items, container, totalDownloads);
+    } catch (err) {
+        console.error('Top downloads error:', err);
+        container.innerHTML =
+            '<p class="muted">Unable to load download statistics.</p>';
+    }
+}
+
+function renderTopDownloads(items, container, totalDownloads) {
+    if (!Array.isArray(items) || items.length === 0) {
+        container.innerHTML =
+            '<p class="muted">No download data available.</p>';
+        return;
+    }
+
+    container.innerHTML = `
+        <div style="margin-bottom:0.5rem;color:#9ca3af;">
+            Total downloads:
+            <strong>${totalDownloads.toLocaleString()}</strong>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            ${items.map((item, index) => `
+                <div style="display:flex;justify-content:space-between;gap:1rem;">
+                    <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        ${index + 1}. ${item.filename}
+                    </span>
+                    <span style="color:#9ca3af;">
+                        ${item.downloads}
+                    </span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
 // Load archive statistics
 async function loadArchiveStats() {
     const statsEl = document.getElementById('archiveStats');
@@ -1614,7 +1728,7 @@ function generateFooter() {
                     <i class="fab fa-facebook"></i>
                 </a>
             </div>
-            <p id="footerCopyright" class="footer-copyright">&copy; 2023 - 2025 Train Simulator Mod Archive</p>
+            <p id="footerCopyright" class="footer-copyright">&copy; 2023 - 2026 Train Simulator Mod Archive</p>
         </div>
     `;
     
