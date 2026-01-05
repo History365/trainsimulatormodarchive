@@ -1585,6 +1585,8 @@ function generateFooter() {
         // Footer already has static content, show immediately
         footerContainer.style.opacity = '1';
         footerContainer.style.transform = 'translateY(0)';
+        // Update year for static footers as well
+        updateFooterYear(existingContent);
         return;
     }
     
@@ -1612,7 +1614,7 @@ function generateFooter() {
                     <i class="fab fa-facebook"></i>
                 </a>
             </div>
-            <p class="footer-copyright">&copy; 2023 - 2025 Train Simulator Mod Archive</p>
+            <p id="footerCopyright" class="footer-copyright">&copy; 2023 - 2025 Train Simulator Mod Archive</p>
         </div>
     `;
     
@@ -1621,5 +1623,42 @@ function generateFooter() {
     // Show footer immediately
     footerContainer.style.opacity = '1';
     footerContainer.style.transform = 'translateY(0)';
+
+    // Update year based on server date (Cloudflare) with client fallback
+    updateFooterYear(footerContainer);
+}
+
+// Fetch server Date header (HEAD request) and update footer year text
+function updateFooterYear(containerElement) {
+    const copyrightEl = containerElement.querySelector('#footerCopyright') || containerElement.querySelector('.footer-copyright');
+    if (!copyrightEl) return;
+
+    const baseYear = 2023;
+
+    function applyYear(year) {
+        if (!year || isNaN(year)) year = new Date().getFullYear();
+        year = Number(year);
+        if (year <= baseYear) {
+            copyrightEl.textContent = `© ${baseYear} Train Simulator Mod Archive`;
+        } else {
+            copyrightEl.textContent = `© ${baseYear} - ${year} Train Simulator Mod Archive`;
+        }
+    }
+
+    // Try to get server time via HEAD request to current origin
+    fetch(window.location.href, { method: 'HEAD', cache: 'no-store' })
+        .then(response => {
+            const dateHeader = response.headers.get('date');
+            if (dateHeader) {
+                const serverYear = new Date(dateHeader).getFullYear();
+                applyYear(serverYear);
+            } else {
+                applyYear(new Date().getFullYear());
+            }
+        })
+        .catch(() => {
+            // Fallback to client time if fetch fails
+            applyYear(new Date().getFullYear());
+        });
 }
 
