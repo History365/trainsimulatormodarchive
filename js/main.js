@@ -1502,25 +1502,25 @@ function renderTopDownloads(items, container, totalDownloads) {
             '<p class="muted">No download data available.</p>';
         return;
     }
-
+    // Render total downloads and an ordered list styled to match the sidebar
     container.innerHTML = `
-        <div style="margin-bottom:0.5rem;color:#9ca3af;">
-            Total downloads:
-            <strong>${totalDownloads.toLocaleString()}</strong>
+        <div class="mb-2" style="color:#9ca3af;font-size:0.95rem;">
+            Total downloads: <strong>${Number(totalDownloads || 0).toLocaleString()}</strong>
         </div>
-
-        <div style="display:flex;flex-direction:column;gap:0.5rem;">
-            ${items.map((item, index) => `
-                <div style="display:flex;justify-content:space-between;gap:1rem;">
-                    <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                        ${index + 1}. ${item.filename}
-                    </span>
-                    <span style="color:#9ca3af;">
-                        ${item.downloads}
-                    </span>
-                </div>
-            `).join('')}
-        </div>
+        <ul class="space-y-2" style="list-style:none;padding-left:0;margin:0;">
+            ${items
+                .slice(0, 5)
+                .map((item, index) => {
+                    const link = 'files.html?file=' + encodeURIComponent(item.filename);
+                    return `
+                <li style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;">
+                    <a href="${link}" class="text-white" style="text-decoration:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${index + 1}. ${item.filename}</a>
+                    <span class="text-gray-400" style="flex:0 0 auto;">${Number(item.downloads || 0).toLocaleString()}</span>
+                </li>
+            `;
+                })
+                .join('')}
+        </ul>
     `;
 }
 
