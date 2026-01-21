@@ -10,7 +10,6 @@ on:
 jobs:
   generate-sitemaps:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
@@ -21,11 +20,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: '18'
 
       - name: Generate sitemaps
-        run: |
-          node scripts/generate-sitemaps.js
+        run: node scripts/generate-sitemaps.js
 
       - name: Show generated files
         run: |
@@ -36,21 +34,19 @@ jobs:
           head -20 image-sitemap.xml
 
       - name: Check if files exist
-        run: |
-          ls -lh sitemap.xml image-sitemap.xml
+        run: ls -lh sitemap.xml image-sitemap.xml
 
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Commit sitemap changes
+      - name: Add and commit
         run: |
-          git add sitemap.xml image-sitemap.xml
+          git add -f sitemap.xml image-sitemap.xml
           git status
           git diff --cached --stat
           git commit -m "chore: auto-generate sitemaps" || echo "No changes to commit"
 
       - name: Push changes
-        run: |
-          git push || echo "Nothing to push"
+        run: git push || echo "Nothing to push"
