@@ -1,53 +1,118 @@
-name: Generate Sitemaps
+const fs = require("fs");
+const path = require("path");
 
-on:
-  push:
-    branches:
-      - main
-      - master
-  workflow_dispatch:
+const SITE_URL = "https://www.trainsimarchive.org";
+const PUBLIC_DIR = path.join(__dirname, "..", "public"); // adjust if needed
 
-jobs:
-  generate-sitemaps:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      
-      - name: Generate sitemaps
-        run: node scripts/generate-sitemaps.js
-      
-      - name: Show generated files
-        run: |
-          echo "=== sitemap.xml ==="
-          head -20 sitemap.xml
-          echo ""
-          echo "=== image-sitemap.xml ==="
-          head -20 image-sitemap.xml
-      
-      - name: Check if files exist
-        run: |
-          ls -lh sitemap.xml image-sitemap.xml
-      
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      
-      - name: Add and commit
-        run: |
-          git add -f sitemap.xml image-sitemap.xml
-          git status
-          git diff --cached --stat
-          git commit -m "chore: auto-generate sitemaps" || echo "No changes to commit"
-      
-      - name: Push changes
-        run: git push || echo "Nothing to push"
+/* =========================
+   Helpers
+========================= */
+
+function normalizePath(p) {
+  return p
+    .replace(/\\/g, "/")             // windows paths
+    .replace(/\/index\.html$/, "")   // index.html → /
+    .replace(/\.html$/, "")          // strip .html
+    .replace(/\/+$/, "");            // remove trailing slash
+}
+
+function isValidHtmlPage(filePath) {
+  return (
+    filePath.endsWith(".html") &&
+    !filePath.includes("/404") &&
+    !filePath.includes("/500") &&
+    !filePath.includes("/api/") &&
+    !filePath.includes("/_")
+  );
+}
+
+/* =========================
+   Walk directory
+========================= */
+
+function walk(dir, results = []) {
+  if (!fs.existsSync(dir)) return results;
+
+  const list = fs.readdirSync(dir);
+  for (const file of list) {
+    const fullPath = path.join(dir, file);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      walk(fullPath, results);
+    } else {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
+
+const allFiles = walk(PUBLIC_DIR);
+
+/* =========================
+   Generate page URLs
+========================= */
+
+const pageUrls = allFiles
+  .filter(isValidHtmlPage)
+  .map(file => {
+    const relative = normalizePath(
+      file.replace(PUBLIC_DIR, "")
+    );
+    return SITE_URL + (relative || "/");
+  });
+
+/* =========================
+   Write sitemap.xml
+========================= */
+
+const sitemapXml =
+`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+${pageUrls.map(url => `
+  <url>
+    <loc>${url}</loc>
+  </url>`).join("")}
+</urlset>`;
+
+fs.writeFileSync("sitemap.xml", sitemapXml.trim());
+console.log(`✅ sitemap.xml generated (${pageUrls.length} URLs)`);
+
+/* =========================
+   Image sitemap
+========================= */
+
+const imageFiles = allFiles.filter(f =>
+  /\.(png|jpe?g|webp)$/i.test(f)
+);
+
+const imageSitemapXml =
+`<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:image="https://www.google.com/schemas/sitemap-image/1.1">
+${imageFiles.map(img => {
+  const rel = img.replace(PUBLIC_DIR, "").replace(/\\/g, "/");
+  const url = SITE_URL + rel;
+  return `
+  <url>
+    <loc>${url}</loc>
+    <image:image>
+      <image:loc>${url}</image:loc>
+    </image:image>
+  </url>`;
+}).join("")}
+</urlset>`;
+
+fs.writeFileSync("image-sitemap.xml", imageSitemapXml.trim());
+console.log(`✅ image-sitemap.xml generated (${imageFiles.length} images)`);
+
+/* =========================
+   Safety check
+========================= */
+
+if (fs.readFileSync("sitemap.xml", "utf8").includes(".html")) {
+  console.warn("⚠️ WARNING: .html URLs detected in sitemap");
+} else {
+  console.log("✅ No .html URLs in sitemap");
+}
