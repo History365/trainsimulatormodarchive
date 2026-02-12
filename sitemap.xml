@@ -301,6 +301,12 @@
   </url>
 
   <url>
+    <loc>https://www.trainsimarchive.org/cleartracks/up-commemorative-pack</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://www.trainsimarchive.org/cleartracks/wp-caboose-pack</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
