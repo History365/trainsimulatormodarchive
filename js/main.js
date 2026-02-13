@@ -188,6 +188,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load random mods on homepage
     loadRandomMods();
+    // Load top mods with download counts
+    loadTopMods();
+    // Load top downloads sidebar
+    loadTopDownloadsSidebar();
     // Load top downloads
     loadTopDownloads();
     
@@ -1373,7 +1377,7 @@ async function loadRandomMods() {
             sessionStorage.setItem('lastShownMods', JSON.stringify(mods.map(m => m.id || m.title)));
         }
         
-        // Map creator slugs to display names
+        // Map creator slugs to display names and vice versa
         const creatorNames = {
             'trurail': 'TruRail Simulations',
             'cleartracks': 'ClearTracks',
@@ -1382,9 +1386,23 @@ async function loadRandomMods() {
             'virtual-rail-creations': 'Virtual Rail Creations'
         };
         
+        // Reverse mapping for display names to URLs
+        const creatorUrlMap = {
+            'TruRail Simulations': 'trurail-simulations',
+            'ClearTracks': 'cleartracks',
+            'UTS Creations': 'uts-creations',
+            'East Coast Simulations': 'east-coast-simulations',
+            'Virtual Rail Creations': 'virtual-rail-creations',
+            'trurail': 'trurail-simulations',
+            'cleartracks': 'cleartracks',
+            'uts-creations': 'uts-creations',
+            'east-coast-simulations': 'east-coast-simulations'
+        };
+        
         container.innerHTML = mods.map(mod => {
             const creatorDisplay = creatorNames[mod.creator] || mod.creator;
-            const creatorLink = mod.creator === 'trurail' ? 'trurail-simulations.html' : `${mod.creator}.html`;
+            const creatorUrl = creatorUrlMap[mod.creator] || creatorUrlMap[creatorDisplay] || mod.creator.toLowerCase().replace(/\s+/g, '-');
+            const creatorLink = `${creatorUrl}.html`;
             return `
             <div class="card">
                 <img src="${mod.image || 'https://files.trainsimarchive.org/media/tsma-logo.png'}" 
@@ -1410,6 +1428,174 @@ async function loadRandomMods() {
         container.innerHTML = '<p class="text-gray-400">Unable to load random mods. Please refresh the page.</p>';
         container.style.opacity = '1';
     }
+}
+
+// Homepage: Load top 5 most downloaded mods with clickable links
+async function loadTopMods() {
+    const container = document.getElementById('topModsContainer');
+    if (!container) return;
+
+    const cacheKey = 'topMods_v1';
+
+    // Try cache first (1 hour)
+    try {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (
+                parsed &&
+                Array.isArray(parsed.mods) &&
+                parsed.mods.length > 0 &&
+                Date.now() - parsed.ts < 1000 * 60 * 60
+            ) {
+                renderTopMods(parsed.mods, container);
+                return;
+            }
+            sessionStorage.removeItem(cacheKey);
+        }
+    } catch (_) {}
+
+    try {
+        const resp = await fetch(
+            'https://api.trainsimarchive.org/api/mods-with-downloads'
+        );
+        if (!resp.ok) throw new Error('API request failed');
+
+        const data = await resp.json();
+
+        // Get top 5 mods (already sorted by download count from API)
+        const mods = Array.isArray(data.mods) ? data.mods.slice(0, 5) : [];
+
+        // Save cache
+        try {
+            sessionStorage.setItem(
+                cacheKey,
+                JSON.stringify({
+                    ts: Date.now(),
+                    mods
+                })
+            );
+        } catch (_) {}
+
+        renderTopMods(mods, container);
+    } catch (err) {
+        console.error('Top mods error:', err);
+        container.innerHTML =
+            '<p class="text-gray-400">Unable to load top mods.</p>';
+        container.style.opacity = '1';
+    }
+}
+
+function renderTopMods(mods, container) {
+    if (!Array.isArray(mods) || mods.length === 0) {
+        container.innerHTML =
+            '<p class="text-gray-400">No mod data available.</p>';
+        container.style.opacity = '1';
+        return;
+    }
+    
+    // Render ordered list of top mods
+    container.innerHTML = `
+        <ol class="space-y-2" style="list-style:none;padding-left:0;margin:0;">
+            ${mods
+                .map((mod, index) => {
+                    return `
+                <li style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid #333;">
+                    <div style="display:flex;align-items:center;gap:0.5rem;flex:1;min-width:0;">
+                        <span style="color:#888;font-weight:600;min-width:1.5rem;">${index + 1}.</span>
+                        <a href="${mod.pageUrl}" target="_blank" class="text-white hover:underline" style="text-decoration:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${mod.modName}</a>
+                    </div>
+                    <span class="text-gray-400" style="flex:0 0 auto;text-align:right;min-width:4rem;">${Number(mod.downloadCount || 0).toLocaleString()} DLs</span>
+                </li>
+            `;
+                })
+                .join('')}
+        </ol>
+    `;
+    
+    container.style.opacity = '1';
+}
+
+// Sidebar: Load top 5 most downloaded mods
+async function loadTopDownloadsSidebar() {
+    const container = document.getElementById('topDownloadsSlidebarContainer');
+    if (!container) return;
+
+    const cacheKey = 'topDownloadsSidebar_v1';
+
+    // Try cache first (1 hour)
+    try {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (
+                parsed &&
+                Array.isArray(parsed.mods) &&
+                parsed.mods.length > 0 &&
+                Date.now() - parsed.ts < 1000 * 60 * 60
+            ) {
+                renderTopDownloadsSidebar(parsed.mods, container);
+                return;
+            }
+            sessionStorage.removeItem(cacheKey);
+        }
+    } catch (_) {}
+
+    try {
+        const resp = await fetch(
+            'https://api.trainsimarchive.org/api/mods-with-downloads'
+        );
+        if (!resp.ok) throw new Error('API request failed');
+
+        const data = await resp.json();
+
+        // Get top 5 mods (already sorted by download count from API)
+        const mods = Array.isArray(data.mods) ? data.mods.slice(0, 5) : [];
+
+        // Save cache
+        try {
+            sessionStorage.setItem(
+                cacheKey,
+                JSON.stringify({
+                    ts: Date.now(),
+                    mods
+                })
+            );
+        } catch (_) {}
+
+        renderTopDownloadsSidebar(mods, container);
+    } catch (err) {
+        console.error('Top downloads sidebar error:', err);
+        container.innerHTML =
+            '<p class="text-gray-400" style="font-size:0.9rem;">Unable to load top downloads.</p>';
+        container.style.opacity = '1';
+    }
+}
+
+function renderTopDownloadsSidebar(mods, container) {
+    if (!Array.isArray(mods) || mods.length === 0) {
+        container.innerHTML =
+            '<li class="text-gray-400" style="font-size:0.9rem;">No mod data available.</li>';
+        container.style.opacity = '1';
+        return;
+    }
+    
+    // Render list matching Categories styling with aligned columns
+    container.innerHTML = mods
+        .map((mod, index) => {
+            return `
+            <li style="display: flex; gap: 0.5rem; align-items: center;">
+                <span style="color: #888; font-weight: 600; min-width: 1.5rem; text-align: right;">${index + 1}.</span>
+                <a href="${mod.pageUrl}" target="_blank" class="hover:underline" style="color: #e0e0e0; text-decoration: none; flex: 1; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+                    <span style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${mod.modName}</span>
+                    <span style="color: #888; font-size: 0.9rem; flex-shrink: 0; white-space: nowrap;">${Number(mod.downloadCount || 0).toLocaleString()} Downloads</span>
+                </a>
+            </li>
+        `;
+        })
+        .join('');
+    
+    container.style.opacity = '1';
 }
 
 // Homepage: Load top 5 most downloaded files
