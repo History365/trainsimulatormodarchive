@@ -186,17 +186,36 @@ document.addEventListener('DOMContentLoaded', function() {
         window.dispatchEvent(new Event('scroll'));
     }, 100);
     
-    // Load random mods on homepage
-    loadRandomMods();
-    // Load top mods with download counts
-    loadTopMods();
-    // Load top downloads sidebar
-    loadTopDownloadsSidebar();
-    // Load top downloads
-    loadTopDownloads();
+    // Page-specific loading: Only load what's relevant for the current page
     
-    // Load archive statistics
-    loadArchiveStats();
+    // Detect which page we're on by checking for page-specific containers
+    const isHomepage = document.getElementById('randomModsContainer') !== null;
+    const isSearchPage = document.getElementById('searchResults') !== null;
+    const isCategoryPage = document.querySelectorAll('.file-details-box[data-name]').length > 0; // Trurail, ClearTracks, UTS, etc.
+    
+    // HOMEPAGE: Load critical elements first
+    if (isHomepage) {
+        // 1. Top downloads sidebar (visible immediately)
+        loadTopDownloadsSidebar();
+        // 2. Random mods (main content area)
+        loadRandomMods();
+        // 3. Archive statistics (least critical, slight delay to prioritize above)
+        setTimeout(() => loadArchiveStats(), 100);
+    }
+    
+    // SEARCH PAGE: Only load mods API if search results container exists
+    if (isSearchPage) {
+        // Search functionality is handled in search page JavaScript
+        // No API loading needed on search page
+    }
+    
+    // CATEGORY PAGES: File details are handled by api-client.js 
+    if (isCategoryPage) {
+        // api-client.js automatically handles:
+        // - Loading file info (download count, size, upload date)
+        // - Tracking downloads
+        // - No need to load homepage data (top downloads, random mods, archive stats)
+    }
     
     // Fade-in animation for content sections
     const fadeElements = document.querySelectorAll('.fade-in');
@@ -1430,54 +1449,71 @@ async function loadRandomMods() {
     }
 }
 
+// Shared cache for mods-with-downloads API (eliminates duplicate requests)
+let sharedModsCache = null;
+let sharedModsFetchPromise = null;
+
+async function fetchModsWithDownloads() {
+    // Return cached result if available
+    if (sharedModsCache) {
+        return sharedModsCache;
+    }
+    
+    // Return existing promise to avoid duplicate requests
+    if (sharedModsFetchPromise) {
+        return sharedModsFetchPromise;
+    }
+    
+    const cacheKey = 'modsWithDownloads_v1';
+    
+    // Check session storage first
+    try {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed && Date.now() - parsed.ts < 1000 * 60 * 60) {
+                sharedModsCache = parsed.mods;
+                return sharedModsCache;
+            }
+        }
+    } catch (_) {}
+    
+    // Fetch from API with timeout
+    sharedModsFetchPromise = Promise.race([
+        fetch('https://api.trainsimarchive.org/api/mods-with-downloads').then(resp => {
+            if (!resp.ok) throw new Error('API request failed');
+            return resp.json();
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('API timeout')), 5000))
+    ]).then(data => {
+        const mods = Array.isArray(data.mods) ? data.mods : [];
+        
+        // Save to session storage
+        try {
+            sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), mods }));
+        } catch (_) {}
+        
+        sharedModsCache = mods;
+        sharedModsFetchPromise = null;
+        return mods;
+    }).catch(err => {
+        sharedModsFetchPromise = null;
+        console.error('Mods API error:', err);
+        return [];
+    });
+    
+    return sharedModsFetchPromise;
+}
+
 // Homepage: Load top 5 most downloaded mods with clickable links
 async function loadTopMods() {
     const container = document.getElementById('topModsContainer');
     if (!container) return;
 
-    const cacheKey = 'topMods_v1';
-
-    // Try cache first (1 hour)
     try {
-        const cached = sessionStorage.getItem(cacheKey);
-        if (cached) {
-            const parsed = JSON.parse(cached);
-            if (
-                parsed &&
-                Array.isArray(parsed.mods) &&
-                parsed.mods.length > 0 &&
-                Date.now() - parsed.ts < 1000 * 60 * 60
-            ) {
-                renderTopMods(parsed.mods, container);
-                return;
-            }
-            sessionStorage.removeItem(cacheKey);
-        }
-    } catch (_) {}
-
-    try {
-        const resp = await fetch(
-            'https://api.trainsimarchive.org/api/mods-with-downloads'
-        );
-        if (!resp.ok) throw new Error('API request failed');
-
-        const data = await resp.json();
-
-        // Get top 5 mods (already sorted by download count from API)
-        const mods = Array.isArray(data.mods) ? data.mods.slice(0, 5) : [];
-
-        // Save cache
-        try {
-            sessionStorage.setItem(
-                cacheKey,
-                JSON.stringify({
-                    ts: Date.now(),
-                    mods
-                })
-            );
-        } catch (_) {}
-
-        renderTopMods(mods, container);
+        const mods = await fetchModsWithDownloads();
+        const topMods = Array.isArray(mods) ? mods.slice(0, 5) : [];
+        renderTopMods(topMods, container);
     } catch (err) {
         console.error('Top mods error:', err);
         container.innerHTML =
@@ -1521,49 +1557,10 @@ async function loadTopDownloadsSidebar() {
     const container = document.getElementById('topDownloadsSlidebarContainer');
     if (!container) return;
 
-    const cacheKey = 'topDownloadsSidebar_v1';
-
-    // Try cache first (1 hour)
     try {
-        const cached = sessionStorage.getItem(cacheKey);
-        if (cached) {
-            const parsed = JSON.parse(cached);
-            if (
-                parsed &&
-                Array.isArray(parsed.mods) &&
-                parsed.mods.length > 0 &&
-                Date.now() - parsed.ts < 1000 * 60 * 60
-            ) {
-                renderTopDownloadsSidebar(parsed.mods, container);
-                return;
-            }
-            sessionStorage.removeItem(cacheKey);
-        }
-    } catch (_) {}
-
-    try {
-        const resp = await fetch(
-            'https://api.trainsimarchive.org/api/mods-with-downloads'
-        );
-        if (!resp.ok) throw new Error('API request failed');
-
-        const data = await resp.json();
-
-        // Get top 5 mods (already sorted by download count from API)
-        const mods = Array.isArray(data.mods) ? data.mods.slice(0, 5) : [];
-
-        // Save cache
-        try {
-            sessionStorage.setItem(
-                cacheKey,
-                JSON.stringify({
-                    ts: Date.now(),
-                    mods
-                })
-            );
-        } catch (_) {}
-
-        renderTopDownloadsSidebar(mods, container);
+        const mods = await fetchModsWithDownloads();
+        const topMods = Array.isArray(mods) ? mods.slice(0, 5) : [];
+        renderTopDownloadsSidebar(topMods, container);
     } catch (err) {
         console.error('Top downloads sidebar error:', err);
         container.innerHTML =
