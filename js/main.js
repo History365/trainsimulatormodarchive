@@ -195,10 +195,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // HOMEPAGE: Load critical elements first
     if (isHomepage) {
-        // 1. Top downloads sidebar (visible immediately)
-        loadTopDownloadsSidebar();
-        // 2. Random mods (main content area)
+        // 1. Random mods (main content area, visible first)
         loadRandomMods();
+        // 2. Top downloads sidebar (visible after mods)
+        loadTopDownloadsSidebar();
         // 3. Archive statistics (least critical, slight delay to prioritize above)
         setTimeout(() => loadArchiveStats(), 100);
     }
