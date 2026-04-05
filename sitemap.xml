@@ -265,6 +265,18 @@
   </url>
 
   <url>
+    <loc>https://www.trainsimarchive.org/uts-creations/acxx00cw-enhancements</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.trainsimarchive.org/uts-creations/aem-7-ep</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://www.trainsimarchive.org/uts-creations/alco-rs-11-ep</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
