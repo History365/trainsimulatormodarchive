@@ -301,6 +301,12 @@
   </url>
 
   <url>
+    <loc>https://www.trainsimarchive.org/cleartracks/csx-1776-veterans-es44ah</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://www.trainsimarchive.org/cleartracks/ex-conrail-c40-8-pack</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
