@@ -157,6 +157,12 @@
   </url>
 
   <url>
+    <loc>https://www.trainsimarchive.org/trurail-simulations/cim-100t-hopper-pack</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://www.trainsimarchive.org/trurail-simulations/cnw-emd-e8</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -181,6 +187,12 @@
   </url>
 
   <url>
+    <loc>https://www.trainsimarchive.org/trurail-simulations/csx-trinity-hoppers</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://www.trainsimarchive.org/trurail-simulations/ex-seaboard-system-gp38-2</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -188,6 +200,12 @@
 
   <url>
     <loc>https://www.trainsimarchive.org/trurail-simulations/ge-c44-9w-texture-upgrade</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.trainsimarchive.org/trurail-simulations/klemme-coop-grain-hopper-pack</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
