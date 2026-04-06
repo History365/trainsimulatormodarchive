@@ -247,6 +247,18 @@
   </url>
 
   <url>
+    <loc>https://www.trainsimarchive.org/trurail-simulations/pullman-standard-4750-pack-1</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.trainsimarchive.org/trurail-simulations/pullman-standard-4750-pack-2</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://www.trainsimarchive.org/trurail-simulations/restored-up-3985</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -284,6 +296,12 @@
 
   <url>
     <loc>https://www.trainsimarchive.org/trurail-simulations/united-way-sd40-2</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.trainsimarchive.org/trurail-simulations/up-100t-hopper-pack</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
