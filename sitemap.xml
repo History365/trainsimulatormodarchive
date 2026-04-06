@@ -301,6 +301,12 @@
   </url>
 
   <url>
+    <loc>https://www.trainsimarchive.org/uts-creations/dda40x-enhancement-pack</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://www.trainsimarchive.org/uts-creations/ge-u-boat-ep</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
