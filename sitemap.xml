@@ -97,6 +97,12 @@
   </url>
 
   <url>
+    <loc>https://www.trainsimarchive.org/trurail-simulations/bethgon-collection</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://www.trainsimarchive.org/trurail-simulations/bn-fuel-tender</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -128,6 +134,12 @@
 
   <url>
     <loc>https://www.trainsimarchive.org/trurail-simulations/bnsf-sd70ace</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.trainsimarchive.org/trurail-simulations/bnsf-trinity-hoppers</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
