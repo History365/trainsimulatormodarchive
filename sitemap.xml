@@ -355,6 +355,12 @@
   </url>
 
   <url>
+    <loc>https://www.trainsimarchive.org/uts-creations/bn-emd-sd38-2-pack</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://www.trainsimarchive.org/uts-creations/coaster-ep</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
