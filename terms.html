@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Terms of Use for Train Simulator Mod Archive - Guidelines and rules for using our archive.">
@@ -25,13 +23,25 @@
     <meta property="twitter:description" content="Terms of Use for Train Simulator Mod Archive - Guidelines and rules for using our archive.">
     <meta property="twitter:image" content="https://files.trainsimarchive.org/media/tsma-logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link rel="preload" href="https://files.trainsimarchive.org/media/tsma-logo.png" as="image">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/custom-dark.css" rel="stylesheet">
-</head>
+<style>
+        @keyframes slideIn {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(100px); opacity: 0; }
+        }
+        #cookieBanner > div {
+            animation: slideIn 0.4s ease-out;
+        }
+    </style></head>
 <body class="body-with-fixed-header">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container-fluid">
@@ -106,7 +116,7 @@
                     <div>
                         <h2>Submit Content for Archival</h2>
                         <p>If you have any delisted content that you would like us to archive, please email us at:</p>
-                        <p><strong><a href="mailto:historyforeveryoneproductions1@gmail.com">historyforeveryoneproductions1@gmail.com</a></strong></p>
+                        <p><strong><a href="mailto:trainsimulatormodarchive@gmail.com">trainsimulatormodarchive@gmail.com</a></strong></p>
                         <p>Please include proof of permission to archive the content. This may include:</p>
                         <ul class="list-disc pl-6 mb-4">
                             <li>Documentation showing you are the original creator</li>
@@ -115,22 +125,9 @@
                         </ul>
                     </div>
 
-                    <div>
-                        <h2>User Responsibilities</h2>
-                        <p>By using this website, you agree to:</p>
-                        <ul class="list-disc pl-6 mb-4">
-                            <li>Respect the intellectual property rights of content creators</li>
-                            <li>Not redistribute content without proper authorization</li>
-                            <li>Use archived content in accordance with any licenses provided by the original creators</li>
-                            <li>Report any copyright concerns to us immediately</li>
-                        </ul>
-                    </div>
+                    
 
-                    <div>
-                        <h2>Preservation Mission</h2>
-                        <p>Train Simulator Mod Archive was started in September 2023 with the mission to preserve delisted and lost Train Simulator Classic content. Our goal is to maintain gaming history and ensure that important community creations remain accessible.</p>
-                        <p>We work directly with creators and only archive content with proper permission and authorization.</p>
-                    </div>
+                    
 
                     <div>
                         <h2>Changes to Terms</h2>
@@ -140,13 +137,13 @@
 
                     <div>
                         <h2>Contact Us</h2>
-                        <p>If you have any questions about these terms, please contact us at <a href="mailto:historyforeveryoneproductions1@gmail.com">historyforeveryoneproductions1@gmail.com</a></p>
+                        <p>If you have any questions about these terms, please contact us at <a href="mailto:trainsimulatormodarchive@gmail.com">trainsimulatormodarchive@gmail.com</a></p>
                     </div>
                 </div>
             </section>
         </div>
     </div>
-    <footer id="dynamicFooter">
+    <footer id="dynamicFooter" style="opacity: 1; transform: translateY(0px);">
         <div class="footer-content">
             <div class="footer-nav">
                 <a href="terms">Terms of Use</a>
@@ -157,9 +154,8 @@
                     <i class="fab fa-facebook"></i>
                 </a>
             </div>
-            <p class="footer-copyright">&copy; 2023 - 2025 Train Simulator Mod Archive</p>
+            <p class="footer-copyright">© 2023 - 2026 Train Simulator Mod Archive</p>
         </div>
     </footer>
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
-</body>
