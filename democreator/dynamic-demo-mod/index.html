@@ -7,49 +7,27 @@
   <link rel="icon" type="image/x-icon" href="https://www.trainsimarchive.org/favicon/favicon.ico">
   <style>
     :root { color-scheme: dark; }
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #f5f5f5;
-      margin: 0;
-      min-height: 100vh;
-      padding: 2rem;
-      line-height: 1.5;
-    }
+    body { font-family: Arial, sans-serif; background: #111; color: #f5f5f5; margin: 0; min-height: 100vh; padding: 2rem; line-height: 1.5; }
     .wrap { max-width: 1100px; margin: 0 auto; }
-    .loading { padding: 2rem 0; color: #bdbdbd; }
     a { color: #7dd3fc; }
-    #content :is(h1, h2, h3, p, li, a) { color: inherit; }
-    #content img { max-width: 100%; }
+    #content { line-height: 1.6; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="loading" id="loading">Loading the dynamic mod page from the archive…</div>
-    <div id="content"></div>
-  </div>
-
+  <div class="wrap" id="content">Loading dynamic content…</div>
   <script>
     (async () => {
       const targetUrl = 'https://api.trainsimarchive.org/democreator/dynamic-demo-mod';
-      const loading = document.getElementById('loading');
-      const content = document.getElementById('content');
-
       try {
         const response = await fetch(targetUrl);
-        if (!response.ok) {
-          throw new Error('Failed to load dynamic page');
-        }
-
+        if (!response.ok) throw new Error('Failed');
         const html = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         document.title = doc.title || 'Dynamic Demo Mod - Train Simulator Mod Archive';
-        content.innerHTML = doc.body.innerHTML;
-        loading.remove();
+        document.getElementById('content').innerHTML = doc.body.innerHTML;
       } catch (error) {
-        loading.innerHTML = 'The dynamic page could not be loaded right now. <a href="https://api.trainsimarchive.org/democreator/dynamic-demo-mod">Open the API version</a>.';
-        console.error(error);
+        document.getElementById('content').innerHTML = '<p>The dynamic page could not be loaded right now. Please try again shortly.</p>';
       }
     })();
   </script>
