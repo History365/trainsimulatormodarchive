@@ -6,6 +6,12 @@
     <meta name="description" content="Page not found - Train Simulator Mod Archive">
     <meta name="keywords" content="train simulator, mods, archive, 404">
     <title>404 - Page Not Found | Train Simulator Mod Archive</title>
+    <script>
+        const requestedPath = window.location.pathname.replace(/\/$/, '');
+        if (requestedPath === '/democreator/dynamic-demo-mod') {
+            window.location.replace('https://api.trainsimarchive.org/democreator/dynamic-demo-mod');
+        }
+    </script>
     
     <!-- Favicon -->
     <link rel="icon" type="image/jpeg" href="favicon/favicon.ico">
