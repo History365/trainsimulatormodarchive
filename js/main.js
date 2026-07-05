@@ -177,6 +177,13 @@ document.addEventListener('DOMContentLoaded', function() {
     initScrollButtons();
     initSidebarNavigation();
     initMobileSidebarToggle();
+    initScrollRows();
+    initIntroToggle();
+
+    window.addEventListener('resize', debounce(function() {
+        markTruncatedTitles(document.getElementById('newestModsContainer'));
+        markTruncatedTitles(document.getElementById('randomModsContainer'));
+    }, 200));
     
     // Generate dynamic footer
     generateFooter();
@@ -195,40 +202,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // HOMEPAGE: Load critical elements first
     if (isHomepage) {
-        // The homepage is now server-rendered with real data already in the
-        // HTML (see renderHomePage in the Worker). Only fall back to a
-        // client-side fetch if the server-rendered content is actually
-        // missing/failed - otherwise re-fetching here just replaces one
-        // valid random set with a different one, causing a visible flash.
-        const randomModsContainer = document.getElementById('randomModsContainer');
-        const hasServerRenderedMods = randomModsContainer && randomModsContainer.querySelector('.card') !== null;
-        if (!hasServerRenderedMods) {
-            // 1. Random mods (main content area, visible first)
-            loadRandomMods();
-        } else if (randomModsContainer) {
-            randomModsContainer.style.opacity = '1';
-        }
-
-        const topDownloadsContainer = document.getElementById('topDownloadsSlidebarContainer');
-        const hasServerRenderedTopDownloads = topDownloadsContainer
-            && topDownloadsContainer.querySelector('li a.hover\\:underline') !== null;
-        if (!hasServerRenderedTopDownloads) {
-            // 2. Top downloads sidebar (visible after mods)
-            loadTopDownloadsSidebar();
-        } else if (topDownloadsContainer) {
-            topDownloadsContainer.style.opacity = '1';
-        }
-
-        const archiveStatsEl = document.getElementById('archiveStats');
-        const hasServerRenderedStats = archiveStatsEl
-            && archiveStatsEl.textContent.trim() !== ''
-            && archiveStatsEl.textContent.trim() !== 'Loading archive statistics...';
-        if (!hasServerRenderedStats) {
-            // 3. Archive statistics (least critical, slight delay to prioritize above)
-            setTimeout(() => loadArchiveStats(), 100);
-        } else if (archiveStatsEl) {
-            archiveStatsEl.style.opacity = '1';
-        }
+        // 1. Newest mods (top row, visible first)
+        loadNewestMods();
+        // 2. Random mods (second row)
+        loadRandomMods();
+        // 3. Top downloads sidebar (visible after mods)
+        loadTopDownloadsSidebar();
+        // 4. Archive statistics (least critical, slight delay to prioritize above)
+        setTimeout(() => loadArchiveStats(), 100);
     }
     
     // SEARCH PAGE: Only load mods API if search results container exists
@@ -1405,8 +1386,8 @@ async function loadRandomMods() {
         
         let mods = data.mods || data;
         
-        // Limit to 4 mods
-        mods = mods.slice(0, 4);
+        // Limit to 10 mods (row now scrolls horizontally, so more content fits)
+        mods = mods.slice(0, 10);
         
         // Get previously shown mods (only if consent given)
         if (canUseStorage) {
@@ -1416,7 +1397,7 @@ async function loadRandomMods() {
             const newMods = mods.filter(mod => !lastShown.includes(mod.id || mod.title));
             
             // If we have enough new mods, use them; otherwise use all mods
-            if (newMods.length >= 4) {
+            if (newMods.length >= 10) {
                 mods = newMods;
             }
             
@@ -1470,10 +1451,107 @@ async function loadRandomMods() {
         setTimeout(() => {
             container.style.opacity = '1';
         }, 100);
+
+        requestAnimationFrame(() => markTruncatedTitles(container));
     } catch (error) {
         console.error('Error loading random mods:', error);
         container.innerHTML = '<p class="text-gray-400">Unable to load random mods. Please refresh the page.</p>';
         container.style.opacity = '1';
+    }
+}
+
+// Homepage: Load newest updated/uploaded mods (top scrollable row)
+async function loadNewestMods() {
+    const container = document.getElementById('newestModsContainer');
+    if (!container) return;
+
+    // Map creator slugs to display names and vice versa
+    const creatorNames = {
+        'trurail': 'TruRail Simulations',
+        'cleartracks': 'ClearTracks',
+        'uts-creations': 'UTS Creations',
+        'east-coast-simulations': 'East Coast Simulations',
+        'virtual-rail-creations': 'Virtual Rail Creations'
+    };
+
+    const creatorUrlMap = {
+        'TruRail Simulations': 'trurail-simulations',
+        'ClearTracks': 'cleartracks',
+        'UTS Creations': 'uts-creations',
+        'East Coast Simulations': 'east-coast-simulations',
+        'Virtual Rail Creations': 'virtual-rail-creations',
+        'trurail': 'trurail-simulations',
+        'cleartracks': 'cleartracks',
+        'uts-creations': 'uts-creations',
+        'east-coast-simulations': 'east-coast-simulations'
+    };
+
+    function renderMods(mods) {
+        container.innerHTML = mods.map(mod => {
+            const creatorDisplay = creatorNames[mod.creator] || mod.creator || '';
+            const creatorSlug = creatorUrlMap[mod.creator] || creatorUrlMap[creatorDisplay] || (mod.creator || '').toLowerCase().replace(/\s+/g, '-');
+            const creatorLink = `https://www.trainsimarchive.org/${creatorSlug}`;
+            return `
+            <div class="card">
+                <img src="${mod.image || 'https://files.trainsimarchive.org/media/tsma-logo.png'}" 
+                     alt="${mod.title}" 
+                     class="thumbnail" 
+                     onclick="window.location='${mod.url}'">
+                <div class="mt-2 text-base title clickable">
+                    <a href="${mod.url}" class="text-white hover:underline">${mod.title}</a>
+                </div>
+                <div class="text-gray-400 author clickable">
+                    <a href="${creatorLink}" class="hover:underline">${creatorDisplay}</a>
+                </div>
+            </div>
+        `;
+        }).join('');
+
+        setTimeout(() => {
+            container.style.opacity = '1';
+        }, 100);
+
+        requestAnimationFrame(() => markTruncatedTitles(container));
+    }
+
+    try {
+        // NOTE: This assumes a "newest-mods" endpoint exists that returns mods
+        // sorted by most recently added/updated first (newest first). If the
+        // Worker/D1 API uses a different route or param, update the URL below.
+        const response = await fetch('https://api.trainsimarchive.org/api/newest-mods?count=10');
+
+        if (!response.ok) {
+            throw new Error(`API returned ${response.status}`);
+        }
+
+        const data = await response.json();
+        let mods = data.mods || data;
+        mods = Array.isArray(mods) ? mods.slice(0, 10) : [];
+
+        if (mods.length === 0) {
+            throw new Error('Newest mods endpoint returned no results');
+        }
+
+        renderMods(mods);
+    } catch (error) {
+        console.error('Error loading newest mods:', error);
+
+        // Fallback so the row isn't left empty if the newest-mods endpoint
+        // doesn't exist yet - reuses the random-mods endpoint instead.
+        try {
+            const fallbackResponse = await fetch('https://api.trainsimarchive.org/api/random-mods?count=10');
+            if (!fallbackResponse.ok) {
+                throw new Error('Fallback request failed');
+            }
+            const fallbackData = await fallbackResponse.json();
+            let fallbackMods = fallbackData.mods || fallbackData;
+            fallbackMods = Array.isArray(fallbackMods) ? fallbackMods.slice(0, 10) : [];
+            renderMods(fallbackMods);
+        } catch (fallbackError) {
+            console.error('Newest mods fallback also failed:', fallbackError);
+            container.innerHTML = '<p class="text-gray-400">Unable to load newest mods. Please refresh the page.</p>';
+            container.style.opacity = '1';
+        }
     }
 }
 
@@ -1817,6 +1895,75 @@ function initScrollButtons() {
             top: 0,
             behavior: 'smooth'
         });
+    });
+}
+
+// Mark mod titles that are actually clipped so the hover "show full title"
+// popout only kicks in when there's hidden text to reveal - otherwise a
+// title that already fits would still jump on hover for no reason.
+function markTruncatedTitles(container) {
+    if (!container) return;
+    const titleLinks = container.querySelectorAll('.title a');
+    titleLinks.forEach(link => {
+        const titleEl = link.closest('.title');
+        if (!titleEl) return;
+        const isTruncated = link.scrollWidth > link.clientWidth + 1;
+        titleEl.classList.toggle('is-truncated', isTruncated);
+    });
+}
+
+// Initialize left/right scroll buttons for horizontally-scrolling mod rows
+function initScrollRows() {
+    const wrappers = document.querySelectorAll('.scroll-row-wrapper');
+
+    wrappers.forEach(wrapper => {
+        const row = wrapper.querySelector('.scroll-row');
+        const leftBtn = wrapper.querySelector('.scroll-btn-left');
+        const rightBtn = wrapper.querySelector('.scroll-btn-right');
+
+        if (!row || !leftBtn || !rightBtn) return;
+
+        function updateButtons() {
+            const maxScroll = row.scrollWidth - row.clientWidth;
+            leftBtn.classList.toggle('is-hidden', row.scrollLeft <= 4);
+            rightBtn.classList.toggle('is-hidden', maxScroll <= 4 || row.scrollLeft >= maxScroll - 4);
+        }
+
+        leftBtn.addEventListener('click', function() {
+            row.scrollBy({ left: -(row.clientWidth * 0.8), behavior: 'smooth' });
+        });
+
+        rightBtn.addEventListener('click', function() {
+            row.scrollBy({ left: row.clientWidth * 0.8, behavior: 'smooth' });
+        });
+
+        row.addEventListener('scroll', updateButtons);
+        window.addEventListener('resize', updateButtons);
+
+        // Cards load in asynchronously, so re-check button visibility once they appear
+        const observer = new MutationObserver(updateButtons);
+        observer.observe(row, { childList: true });
+
+        updateButtons();
+    });
+}
+
+// Initialize collapsible "Read more" toggle for the homepage intro text
+function initIntroToggle() {
+    const toggleBtn = document.getElementById('introToggle');
+    const extra = document.getElementById('introExtra');
+
+    if (!toggleBtn || !extra) return;
+
+    toggleBtn.addEventListener('click', function() {
+        const isExpanded = extra.classList.toggle('expanded');
+        toggleBtn.classList.toggle('expanded', isExpanded);
+        toggleBtn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+
+        const label = toggleBtn.querySelector('span');
+        if (label) {
+            label.textContent = isExpanded ? 'Show less' : 'Read more';
+        }
     });
 }
 
