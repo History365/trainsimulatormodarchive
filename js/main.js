@@ -195,12 +195,40 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // HOMEPAGE: Load critical elements first
     if (isHomepage) {
-        // 1. Random mods (main content area, visible first)
-        loadRandomMods();
-        // 2. Top downloads sidebar (visible after mods)
-        loadTopDownloadsSidebar();
-        // 3. Archive statistics (least critical, slight delay to prioritize above)
-        setTimeout(() => loadArchiveStats(), 100);
+        // The homepage is now server-rendered with real data already in the
+        // HTML (see renderHomePage in the Worker). Only fall back to a
+        // client-side fetch if the server-rendered content is actually
+        // missing/failed - otherwise re-fetching here just replaces one
+        // valid random set with a different one, causing a visible flash.
+        const randomModsContainer = document.getElementById('randomModsContainer');
+        const hasServerRenderedMods = randomModsContainer && randomModsContainer.querySelector('.card') !== null;
+        if (!hasServerRenderedMods) {
+            // 1. Random mods (main content area, visible first)
+            loadRandomMods();
+        } else if (randomModsContainer) {
+            randomModsContainer.style.opacity = '1';
+        }
+
+        const topDownloadsContainer = document.getElementById('topDownloadsSlidebarContainer');
+        const hasServerRenderedTopDownloads = topDownloadsContainer
+            && topDownloadsContainer.querySelector('li a.hover\\:underline') !== null;
+        if (!hasServerRenderedTopDownloads) {
+            // 2. Top downloads sidebar (visible after mods)
+            loadTopDownloadsSidebar();
+        } else if (topDownloadsContainer) {
+            topDownloadsContainer.style.opacity = '1';
+        }
+
+        const archiveStatsEl = document.getElementById('archiveStats');
+        const hasServerRenderedStats = archiveStatsEl
+            && archiveStatsEl.textContent.trim() !== ''
+            && archiveStatsEl.textContent.trim() !== 'Loading archive statistics...';
+        if (!hasServerRenderedStats) {
+            // 3. Archive statistics (least critical, slight delay to prioritize above)
+            setTimeout(() => loadArchiveStats(), 100);
+        } else if (archiveStatsEl) {
+            archiveStatsEl.style.opacity = '1';
+        }
     }
     
     // SEARCH PAGE: Only load mods API if search results container exists
@@ -1421,7 +1449,7 @@ async function loadRandomMods() {
         container.innerHTML = mods.map(mod => {
             const creatorDisplay = creatorNames[mod.creator] || mod.creator;
             const creatorUrl = creatorUrlMap[mod.creator] || creatorUrlMap[creatorDisplay] || mod.creator.toLowerCase().replace(/\s+/g, '-');
-            const creatorLink = `${creatorUrl}.html`;
+            const creatorLink = `https://www.trainsimarchive.org/${creatorUrl}`;
             return `
             <div class="card">
                 <img src="${mod.image || 'https://files.trainsimarchive.org/media/tsma-logo.png'}" 
@@ -1958,4 +1986,3 @@ function updateFooterYear(containerElement) {
             applyYear(new Date().getFullYear());
         });
 }
-
