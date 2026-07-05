@@ -1,3 +1,3 @@
 # Cloudflare Pages rewrite for the demo fallback route
-/democreator/dynamic-demo-mod /democreator/dynamic-demo-mod.html 200
-/democreator/dynamic-demo-mod/ /democreator/dynamic-demo-mod.html 200
+/democreator/dynamic-demo-mod /democreator/demo-fallback.html 200
+/democreator/dynamic-demo-mod/ /democreator/demo-fallback.html 200
