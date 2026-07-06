@@ -1515,10 +1515,10 @@ async function loadNewestMods() {
     }
 
     try {
-        // NOTE: This assumes a "newest-mods" endpoint exists that returns mods
-        // sorted by most recently added/updated first (newest first). If the
-        // Worker/D1 API uses a different route or param, update the URL below.
-        const response = await fetch('https://api.trainsimarchive.org/api/newest-mods?count=10');
+        // Recently-updated mods, sorted server-side by updated_at (falls back
+        // to created_at). Field names differ from /api/random-mods, so they're
+        // normalized to {title, creator, image, url} below to match renderMods().
+        const response = await fetch('https://api.trainsimarchive.org/api/mods/recent?limit=10');
 
         if (!response.ok) {
             throw new Error(`API returned ${response.status}`);
@@ -1529,15 +1529,22 @@ async function loadNewestMods() {
         mods = Array.isArray(mods) ? mods.slice(0, 10) : [];
 
         if (mods.length === 0) {
-            throw new Error('Newest mods endpoint returned no results');
+            throw new Error('Recent mods endpoint returned no results');
         }
 
-        renderMods(mods);
+        const normalizedMods = mods.map(mod => ({
+            title: mod.title,
+            creator: mod.creator_slug || mod.creator_name || mod.creator,
+            image: mod.image_url || mod.image,
+            url: mod.page_url || mod.url
+        }));
+
+        renderMods(normalizedMods);
     } catch (error) {
         console.error('Error loading newest mods:', error);
 
-        // Fallback so the row isn't left empty if the newest-mods endpoint
-        // doesn't exist yet - reuses the random-mods endpoint instead.
+        // Fallback so the row isn't left empty if /api/mods/recent errors
+        // out for any reason - reuses the random-mods endpoint instead.
         try {
             const fallbackResponse = await fetch('https://api.trainsimarchive.org/api/random-mods?count=10');
             if (!fallbackResponse.ok) {
@@ -1656,6 +1663,44 @@ function renderTopMods(mods, container) {
     `;
     
     container.style.opacity = '1';
+}
+
+async function loadFileInfo() {
+    const downloadLink = document.querySelector('.download-trigger');
+    if (!downloadLink) return;
+
+    const downloadUrl = downloadLink.dataset.url;
+    if (!downloadUrl) return;
+
+    const filename = decodeURIComponent(downloadUrl.split('/').pop());
+
+    try {
+        const response = await fetch(
+            `https://api.trainsimarchive.org/api/file-info/${encodeURIComponent(filename)}`
+        );
+
+        if (!response.ok) return;
+
+        const info = await response.json();
+
+        const size = document.querySelector('{data-file-size}');
+        if (size && info.fileSize) {
+            size.textContent = info.fileSize;
+        }
+
+        const uploaded = document.querySelector('{data-file-uploaded}');
+        if (uploaded && info.uploadDate) {
+            uploaded.textContent = info.uploadDate;
+        }
+
+        const downloads = document.querySelector('{data-file-downloads}');
+        if (downloads) {
+            downloads.textContent = (info.downloads ?? 0).toLocaleString();
+        }
+
+    } catch (err) {
+        console.error('Error loading file info:', err);
+    }
 }
 
 // Sidebar: Load top 5 most downloaded mods
