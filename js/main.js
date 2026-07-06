@@ -1534,7 +1534,7 @@ async function loadNewestMods() {
 
         const normalizedMods = mods.map(mod => ({
             title: mod.title,
-            creator: mod.creator_slug || mod.creator_name || mod.creator,
+            creator: mod.creator_name || mod.creator_slug || mod.creator,
             image: mod.image_url || mod.image,
             url: mod.page_url || mod.url
         }));
