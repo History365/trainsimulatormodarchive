@@ -210,6 +210,15 @@ document.addEventListener('DOMContentLoaded', function() {
         loadTopDownloadsSidebar();
         // 4. Archive statistics (least critical, slight delay to prioritize above)
         setTimeout(() => loadArchiveStats(), 100);
+
+        // When the homepage is server-rendered, loadNewestMods()/loadRandomMods()
+        // return early (see data-ssr checks above) and never get to their own
+        // markTruncatedTitles() call - do it here instead so the hover
+        // "show full title" behavior still works on first load.
+        requestAnimationFrame(() => {
+            markTruncatedTitles(document.getElementById('newestModsContainer'));
+            markTruncatedTitles(document.getElementById('randomModsContainer'));
+        });
     }
     
     // SEARCH PAGE: Only load mods API if search results container exists
@@ -1371,6 +1380,12 @@ async function loadRandomMods() {
         return;
     }
     
+    // Server already rendered this row (see renderHomepage in html-template.js)
+    // - skip the fetch so we don't flash/replace real content a moment later.
+    if (container.dataset.ssr === 'true') {
+        return;
+    }
+    
     // Check cookie consent for localStorage usage
     const consent = getCookieConsent();
     const canUseStorage = consent === 'accepted' || consent === null;
@@ -1464,6 +1479,9 @@ async function loadRandomMods() {
 async function loadNewestMods() {
     const container = document.getElementById('newestModsContainer');
     if (!container) return;
+
+    // Server already rendered this row - skip the fetch.
+    if (container.dataset.ssr === 'true') return;
 
     // Map creator slugs to display names and vice versa
     const creatorNames = {
@@ -1708,6 +1726,9 @@ async function loadTopDownloadsSidebar() {
     const container = document.getElementById('topDownloadsSlidebarContainer');
     if (!container) return;
 
+    // Server already rendered this list - skip the fetch.
+    if (container.dataset.ssr === 'true') return;
+
     try {
         const mods = await fetchModsWithDownloads();
         const topMods = Array.isArray(mods) ? mods.slice(0, 5) : [];
@@ -1862,6 +1883,11 @@ function renderTopDownloads(items, container, totalDownloads) {
 async function loadArchiveStats() {
     const statsEl = document.getElementById('archiveStats');
     if (!statsEl) return;
+    
+    // Server already rendered this stat line (from the real D1 count via
+    // buildHomepageData/renderHomepage) - skip the legacy fetch so it
+    // doesn't get overwritten with the old KV-only total a moment later.
+    if (statsEl.dataset.ssr === 'true') return;
     
     try {
         const response = await fetch('https://api.trainsimarchive.org/api/random-mods?count=1');
