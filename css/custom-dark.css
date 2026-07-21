@@ -89,11 +89,11 @@
 :root[data-theme="light"] {
     color-scheme: light;
 
-    --primary-color: #4f76d9;
+    --primary-color: #3a5fc4;
     --secondary-color: #2a59c3;
     --secondary-gradient-end: #1e438c;
-    --accent-color: #00aaff;
-    --accent-blue: #4a9eff;
+    --accent-color: #0073b1;
+    --accent-blue: #1f5fb8;
 
     --dark-bg: #f5f6f8;
     --darker-bg: #ffffff;
@@ -105,10 +105,10 @@
 
     --text-color: #171a1f;
     --text-secondary: #4b5563;
-    --text-tertiary: #6b7280;
-    --text-disabled: #9aa1ac;
+    --text-tertiary: #5f6673;
+    --text-disabled: #6e7581;
     --muted-text: #5b6472;
-    --dimmed-text: #8a919c;
+    --dimmed-text: #666d79;
 
     --border-color: #d8dbe0;
     --border-soft: #e2e4e8;
@@ -124,7 +124,7 @@
     --btn-secondary-grad-end: #e2e4e8;
     --btn-secondary-grad-hover-start: #f5f6f8;
 
-    --success-color: #1f9d54;
+    --success-color: #137a41;
     --danger-color: #dc2626;
     --warning-color: #b45309;
     --pink-accent: #d81b6a;
@@ -144,11 +144,11 @@
     :root:not([data-theme="dark"]) {
         color-scheme: light;
 
-        --primary-color: #4f76d9;
+        --primary-color: #3a5fc4;
         --secondary-color: #2a59c3;
         --secondary-gradient-end: #1e438c;
-        --accent-color: #00aaff;
-        --accent-blue: #4a9eff;
+        --accent-color: #0073b1;
+        --accent-blue: #1f5fb8;
 
         --dark-bg: #f5f6f8;
         --darker-bg: #ffffff;
@@ -160,10 +160,10 @@
 
         --text-color: #171a1f;
         --text-secondary: #4b5563;
-        --text-tertiary: #6b7280;
-        --text-disabled: #9aa1ac;
+        --text-tertiary: #5f6673;
+        --text-disabled: #6e7581;
         --muted-text: #5b6472;
-        --dimmed-text: #8a919c;
+        --dimmed-text: #666d79;
 
         --border-color: #d8dbe0;
         --border-soft: #e2e4e8;
@@ -179,7 +179,7 @@
         --btn-secondary-grad-end: #e2e4e8;
         --btn-secondary-grad-hover-start: #f5f6f8;
 
-        --success-color: #1f9d54;
+        --success-color: #137a41;
         --danger-color: #dc2626;
         --warning-color: #b45309;
         --pink-accent: #d81b6a;
@@ -831,7 +831,7 @@ ul, ol {
 .hamburger-line {
     width: 25px;
     height: 3px;
-    background-color: white;
+    background-color: var(--text-color);
     margin: 3px 0;
     transition: 0.3s;
     border-radius: 2px;
@@ -869,7 +869,7 @@ ul, ol {
 
 .mobile-nav-link {
     display: block;
-    color: white;
+    color: var(--text-color);
     text-decoration: none;
     padding: 0.75rem 1rem;
     font-weight: 500;
@@ -922,7 +922,7 @@ ul, ol {
 
 .mobile-nav-sublink:active {
     background-color: var(--surface-2);
-    color: white;
+    color: var(--text-color);
     text-decoration: none;
 }
 
@@ -1116,7 +1116,7 @@ body {
 .site-logo {
     font-size: 24px;
     font-weight: bold;
-    color: white;
+    color: var(--text-color);
     text-shadow: var(--glow-effect);
     margin-bottom: 10px;
     font-family: "Courier New", Courier, monospace;
@@ -1505,7 +1505,7 @@ body {
 .btn-secondary {
     background: linear-gradient(180deg, var(--btn-secondary-grad-start), var(--btn-secondary-grad-end));
     border: 1px solid var(--light-bg);
-    color: white;
+    color: var(--text-color);
     box-shadow: var(--shadow-subtle);
 }
 
@@ -2121,7 +2121,7 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     border-color: var(--border-strong);
-    color: white;
+    color: var(--text-color);
     text-decoration: none;
 }
 
@@ -2190,7 +2190,7 @@ body {
 /* Download Button */
 .mod-exconrail-download-button {
     background: var(--light-bg);
-    color: white;
+    color: var(--text-color);
     padding: 0.875rem 2rem;
     border-radius: 8px;
     text-decoration: none;
@@ -2205,7 +2205,7 @@ body {
 
 .mod-exconrail-download-button:hover {
     background: var(--divider-color);
-    color: white;
+    color: var(--text-color);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     border-color: var(--border-strong);
@@ -2703,7 +2703,7 @@ body {
     align-items: center;
     gap: 0.75rem;
     background: var(--light-bg);
-    color: white;
+    color: var(--text-color);
     padding: 1rem 2.5rem;
     border-radius: 8px;
     text-decoration: none;
@@ -2716,7 +2716,7 @@ body {
 
 .download-manual-button:hover {
     background: var(--divider-color);
-    color: white;
+    color: var(--text-color);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     border-color: var(--border-strong);
